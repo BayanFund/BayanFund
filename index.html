@@ -45,6 +45,27 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+            #soa-print-area, #soa-print-area * {
+                visibility: visible !important;
+            }
+            #soa-print-area {
+                position: fixed !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                background: #ffffff !important;
+                padding: 20px !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
@@ -180,13 +201,19 @@
                     <h2 class="text-2xl font-extrabold text-slate-900">Welcome, <span id="user-welcome-name">Member</span></h2>
                     <p class="text-sm text-slate-500">Manage your Balloon Payment Loan, Amortized Loan, and Savings Wallet (Deposit & Withdraw).</p>
                 </div>
-                <div class="flex items-center gap-3 bg-slate-50 px-4 py-3 rounded-2xl border border-slate-200">
-                    <div class="text-right">
-                        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Credit Score</div>
-                        <div id="user-credit-score" class="text-2xl font-black text-emerald-600">650</div>
-                    </div>
-                    <div id="user-credit-badge" class="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-100 text-emerald-800">
-                        Good Standing
+                <div class="flex flex-wrap items-center gap-3">
+                    <button onclick="openMemberSOAModal(currentUser.id)" class="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white text-xs sm:text-sm font-bold shadow-sm transition">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Print My SOA</span>
+                    </button>
+                    <div class="flex items-center gap-3 bg-slate-50 px-4 py-3 rounded-2xl border border-slate-200">
+                        <div class="text-right">
+                            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Credit Score</div>
+                            <div id="user-credit-score" class="text-2xl font-black text-emerald-600">650</div>
+                        </div>
+                        <div id="user-credit-badge" class="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-100 text-emerald-800">
+                            Good Standing
+                        </div>
                     </div>
                 </div>
             </div>
@@ -593,9 +620,6 @@
 
         <!-- =================================================================
              3. INVESTOR DASHBOARD
-                - Invested Capital FROZEN for 1 Year from Effective Date
-                - Auto 1% Monthly Return credited directly to Savings Wallet
-                - Investor can ONLY withdraw the 1% interest inside Savings Wallet
         ================================================================== -->
         <section id="investor-dashboard" class="hidden space-y-6 w-full self-start">
             <!-- Investor Header -->
@@ -607,13 +631,19 @@
                     <h2 class="text-2xl sm:text-3xl font-extrabold">Welcome, <span id="inv-welcome-name">Investor</span></h2>
                     <p class="text-sm text-slate-300 mt-1">Principal is locked for 1 year. Your 1% monthly interest automatically enters your Savings Wallet.</p>
                 </div>
-                <div class="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-3 rounded-2xl border border-white/10">
-                    <div class="text-right">
-                        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-300">Credit Score</div>
-                        <div id="inv-credit-score" class="text-2xl font-black text-emerald-400">750</div>
-                    </div>
-                    <div class="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300">
-                        Priority Tier
+                <div class="flex flex-wrap items-center gap-3">
+                    <button onclick="openMemberSOAModal(currentUser.id)" class="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold shadow-md transition">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Print My SOA</span>
+                    </button>
+                    <div class="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-3 rounded-2xl border border-white/10">
+                        <div class="text-right">
+                            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-300">Credit Score</div>
+                            <div id="inv-credit-score" class="text-2xl font-black text-emerald-400">750</div>
+                        </div>
+                        <div class="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300">
+                            Priority Tier
+                        </div>
                     </div>
                 </div>
             </div>
@@ -907,7 +937,7 @@
                         <i class="fa-solid fa-shield-halved"></i> Administrator Access
                     </span>
                     <h2 class="text-2xl font-extrabold text-slate-900">Admin Control Center</h2>
-                    <p class="text-sm text-slate-500">Monitor business cashflow growth, manage members, review loans, and approve savings & investments.</p>
+                    <p class="text-sm text-slate-500">Monitor business cashflow growth, manage members, print SOAs, and manage synced transaction history.</p>
                 </div>
                 <button onclick="openCreateMemberModal()" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-md shadow-emerald-600/20 transition">
                     <i class="fa-solid fa-user-plus"></i>
@@ -945,7 +975,7 @@
                     <i class="fa-solid fa-chart-line mr-1.5 text-emerald-400"></i> Business Cashflow & Chart
                 </button>
                 <button id="admin-tab-members" onclick="switchAdminTab('members')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
-                    <i class="fa-solid fa-users-gear mr-1.5"></i> Members (<span id="admin-kpi-members">0</span>)
+                    <i class="fa-solid fa-users-gear mr-1.5"></i> Members & SOA (<span id="admin-kpi-members">0</span>)
                 </button>
                 <button id="admin-tab-loans" onclick="switchAdminTab('loans')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
                     <i class="fa-solid fa-file-signature mr-1.5"></i> Loans (<span id="admin-badge-loans">0</span>)
@@ -1031,7 +1061,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Date</label>
-                                    <input type="date" id="cf-entry-date" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-xs font-semibold">
+                                    <input type="date" id="cf-entry-date" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-xs font-semibold">
                                 </div>
                             </div>
 
@@ -1063,6 +1093,7 @@
                                     <th class="py-3 px-3 text-right">Cash In (+Pumasok)</th>
                                     <th class="py-3 px-3 text-right">Cash Out (-Lumabas)</th>
                                     <th class="py-3 px-3 text-right">Running Balance</th>
+                                    <th class="py-3 px-3 text-right">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="admin-cashflow-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
@@ -1074,8 +1105,8 @@
             <!-- ADMIN PANEL 1: MEMBER ACCOUNTS TABLE -->
             <div id="admin-panel-members" class="hidden bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
                 <div class="mb-4">
-                    <h3 class="font-bold text-lg text-slate-900">Member Accounts Directory</h3>
-                    <p class="text-xs text-slate-500">Create new member logins or click <strong>Edit Account</strong> to update limits, balances, and roles.</p>
+                    <h3 class="font-bold text-lg text-slate-900">Member Accounts Directory & Statement of Account (SOA)</h3>
+                    <p class="text-xs text-slate-500">Click <strong>SOA</strong> to view/print a member's complete Statement of Account, or <strong>Edit Account</strong> to update profile details.</p>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -1088,7 +1119,7 @@
                                 <th class="py-3 px-3">Savings Wallet</th>
                                 <th class="py-3 px-3">Invested Capital</th>
                                 <th class="py-3 px-3">Accrued Interest</th>
-                                <th class="py-3 px-3 text-right">Action</th>
+                                <th class="py-3 px-3 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="admin-members-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
@@ -1099,7 +1130,7 @@
             <!-- ADMIN PANEL 2: LOAN APPROVAL & PAYMENT DEDUCTION QUEUE -->
             <div id="admin-panel-loans" class="hidden bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
                 <h3 class="font-bold text-lg text-slate-900 mb-1">Balloon & Amortized Loan Management</h3>
-                <p class="text-xs text-slate-500 mb-4">Review full loan application details, approve & release funds, deduct installments (hulog), or log 7% monthly Balloon interest.</p>
+                <p class="text-xs text-slate-500 mb-4">Review full loan application details, approve & release funds, deduct installments, or delete history (synced across user & investor).</p>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -1124,7 +1155,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                     <div>
                         <h3 class="font-bold text-lg text-slate-900">Member Savings Deposits & Withdrawals</h3>
-                        <p class="text-xs text-slate-500">Approve Cash/Online deposits, approve Withdrawals (1–2 working days), or credit 4% p.a. monthly borrower savings interest.</p>
+                        <p class="text-xs text-slate-500">Approve Cash/Online deposits, approve Withdrawals (1–2 working days), or delete history (auto-adjusts balance & syncs to user/investor).</p>
                     </div>
                     <button onclick="creditMonthlySavingsInterestToAll()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-sm transition">
                         <i class="fa-solid fa-percent"></i>
@@ -1153,7 +1184,7 @@
             <!-- ADMIN PANEL 4: INVESTOR DEPOSIT APPROVALS (1-YR FREEZE + AUTO 1%/MO) -->
             <div id="admin-panel-deposits" class="hidden bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
                 <h3 class="font-bold text-lg text-slate-900 mb-1">Investor Capital Deposits (1-Yr Freeze + Auto 1%/Mo Yield)</h3>
-                <p class="text-xs text-slate-500 mb-4">Approving an investment locks the principal for 1 year and schedules automatic 1% monthly interest payouts to the investor's Savings Wallet.</p>
+                <p class="text-xs text-slate-500 mb-4">Approving an investment locks the principal for 1 year and schedules automatic 1% monthly interest payouts. Deleting removes it from Admin & Investor views.</p>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -1552,6 +1583,93 @@
     </div>
 
     <!-- =====================================================================
+         MODAL 5: PRINTABLE STATEMENT OF ACCOUNT (SOA) MODAL
+    ====================================================================== -->
+    <div id="soa-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 my-auto">
+            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-200 no-print">
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Printable Statement of Account</span>
+                    <span class="text-xs text-slate-500 hidden sm:inline">Print directly or Save as PDF</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.print()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-md transition">
+                        <i class="fa-solid fa-print"></i> Print / Save PDF
+                    </button>
+                    <button onclick="closeSOAModal()" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="soa-print-area" class="space-y-6 text-slate-800">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-slate-900 pb-4 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black tracking-tight text-slate-900">Bayan<span class="text-emerald-600">Fund</span></h2>
+                        <p class="text-xs text-slate-500">Community Lending & Investment Portal • Official Statement of Account</p>
+                    </div>
+                    <div class="sm:text-right text-xs">
+                        <div class="font-extrabold text-sm uppercase tracking-wider text-slate-900">Statement of Account (SOA)</div>
+                        <div class="text-slate-500">Date Generated: <span id="soa-date-generated" class="font-bold text-slate-800"></span></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
+                    <div>
+                        <div class="text-slate-400 font-bold uppercase text-[10px]">Account Holder</div>
+                        <div id="soa-member-name" class="font-extrabold text-sm text-slate-900 mt-0.5">—</div>
+                        <div id="soa-member-role" class="text-[11px] font-semibold text-emerald-700 uppercase">—</div>
+                    </div>
+                    <div>
+                        <div class="text-slate-400 font-bold uppercase text-[10px]">Contact / Address</div>
+                        <div id="soa-member-contact" class="font-semibold text-slate-800 mt-0.5">—</div>
+                        <div id="soa-member-address" class="text-[11px] text-slate-500 truncate">—</div>
+                    </div>
+                    <div>
+                        <div class="text-slate-400 font-bold uppercase text-[10px]">Savings / Wallet Bal.</div>
+                        <div id="soa-savings-bal" class="font-extrabold text-sm text-sky-700 mt-0.5">₱0.00</div>
+                        <div class="text-[11px] text-slate-500">Credit Score: <span id="soa-credit-score" class="font-bold">650</span></div>
+                    </div>
+                    <div>
+                        <div id="soa-kpi4-label" class="text-slate-400 font-bold uppercase text-[10px]">Remaining Loan Bal.</div>
+                        <div id="soa-kpi4-value" class="font-extrabold text-sm text-rose-700 mt-0.5">₱0.00</div>
+                        <div id="soa-kpi4-sub" class="text-[11px] text-slate-500">—</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-2">Complete Transaction History</h4>
+                    <table class="w-full text-left border-collapse border border-slate-200 text-xs">
+                        <thead class="bg-slate-100">
+                            <tr class="border-b border-slate-300 text-[10px] font-extrabold uppercase tracking-wider text-slate-600">
+                                <th class="py-2.5 px-3 border-r border-slate-200">Date</th>
+                                <th class="py-2.5 px-3 border-r border-slate-200">Transaction Type</th>
+                                <th class="py-2.5 px-3 border-r border-slate-200">Details / Reference</th>
+                                <th class="py-2.5 px-3 border-r border-slate-200 text-right">Amount</th>
+                                <th class="py-2.5 px-3 text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="soa-transactions-tbody" class="divide-y divide-slate-200"></tbody>
+                    </table>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8 pt-8 text-xs">
+                    <div>
+                        <div class="border-b border-slate-400 w-48 mb-1"></div>
+                        <div class="font-bold text-slate-700">Prepared by: Administrator</div>
+                        <div class="text-[10px] text-slate-400">BayanFund Management</div>
+                    </div>
+                    <div class="text-right flex flex-col items-end">
+                        <div class="border-b border-slate-400 w-48 mb-1"></div>
+                        <div id="soa-sign-member" class="font-bold text-slate-700">Member Signature</div>
+                        <div class="text-[10px] text-slate-400">Acknowledged Correct</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
          FOOTER
     ====================================================================== -->
     <footer class="bg-white border-t border-slate-200 py-5 mt-auto">
@@ -1562,7 +1680,7 @@
     </footer>
 
     <!-- =====================================================================
-         APPLICATION LOGIC (SUPABASE PRODUCTION ENGINE)
+         APPLICATION LOGIC (SUPABASE PRODUCTION ENGINE + SOA + SYNCED DELETE)
     ====================================================================== -->
     <script>
         const SUPABASE_URL = 'https://zzqjdrgtdkqgcxlzmysz.supabase.co';
@@ -1718,9 +1836,6 @@
         /**
          * ===================================================================
          * 2. AUTO 1% MONTHLY INVESTOR YIELD -> SAVINGS WALLET ENGINE
-         *    - Runs automatically on dashboard load
-         *    - Credits 1% of each approved investment every month after effective_date
-         *      directly into the investor's Savings Wallet (savings_balance)
          * ===================================================================
          */
         async function processAutoInvestorYields(db) {
@@ -1734,7 +1849,6 @@
                 const matDate = inv.maturity_date || addYearsToDateStr(effDate, 1);
                 let nextPayout = inv.next_payout_date || advanceDueDateByFrequency(effDate, 'monthly');
 
-                // Backfill schedule dates if missing on legacy approved records
                 if (!inv.effective_date || !inv.maturity_date || !inv.next_payout_date) {
                     await supabaseClient.from('investments').update({
                         effective_date: effDate,
@@ -1753,7 +1867,6 @@
                     const monthlyYield = Number((Number(inv.amount) * 0.01).toFixed(2));
                     if (monthlyYield <= 0) break;
 
-                    // Optimistic lock update so duplicate tabs cannot double-credit the same cycle
                     const { data: updatedRows, error: lockErr } = await supabaseClient
                         .from('investments')
                         .update({
@@ -1772,7 +1885,6 @@
                     nextPayout = upcomingPayoutDate;
                     anyCredited = true;
 
-                    // Credit 1% return directly to Investor's Savings Wallet & Accrued Interest
                     const { data: invProf } = await supabaseClient
                         .from('profiles')
                         .select('savings_balance, accrued_earnings')
@@ -2023,7 +2135,6 @@
 
             let db = await fetchAllData();
 
-            // Run auto 1% monthly investor yield engine; re-fetch if any yields were credited
             const credited = await processAutoInvestorYields(db);
             if (credited) {
                 db = await fetchAllData();
@@ -2577,7 +2688,6 @@
             document.getElementById('inv-form-limit-hint').textContent = formatPHP(availableLimit);
             document.getElementById('inv-active-balance').textContent = formatPHP(activeRem);
 
-            // Investment Tranches Table (with 1-Year Freeze & Auto 1% Payout Date)
             const today = getTodayStr();
             const myDeposits = db.investments.filter(i => i.investor_id === currentUser.id);
             const depTbody = document.getElementById('inv-deposits-tbody');
@@ -2611,7 +2721,6 @@
                 }).join('');
             }
 
-            // Investor Savings Wallet Ledger (1% Auto-Yields & Withdrawals)
             const invSavTbody = document.getElementById('inv-savings-ledger-tbody');
             if (mySavingsAll.length === 0) {
                 invSavTbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 text-xs">No interest credits or withdrawal records yet.</td></tr>`;
@@ -2634,7 +2743,6 @@
                 }).join('');
             }
 
-            // Personal Loans Table
             const loanTbody = document.getElementById('inv-loans-tbody');
             if (myLoans.length === 0) {
                 loanTbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 text-xs">No personal loan applications found.</td></tr>`;
@@ -2676,7 +2784,7 @@
 
         /**
          * ===================================================================
-         * 8. ADMIN CONTROL CENTER & BUSINESS CASHFLOW CHART
+         * 8. ADMIN CONTROL CENTER, SYNCED DELETE & PRINTABLE SOA
          * ===================================================================
          */
         function switchAdminTab(tab) {
@@ -2780,7 +2888,6 @@
         function computeAndRenderAdminCashflow(db) {
             const entries = [];
 
-            // 1. Approved Investor Deposits -> Cash In
             db.investments
                 .filter(i => i.status === 'approved')
                 .forEach(i => {
@@ -2789,11 +2896,11 @@
                         category: 'Investor Capital In',
                         description: `${i.investor_name} (${i.reference_no || 'Investment'})`,
                         cashIn: Number(i.amount || 0),
-                        cashOut: 0
+                        cashOut: 0,
+                        cfId: null
                     });
                 });
 
-            // 2. Approved Member Savings Deposits (External Cash/Online only; internal yields are tracked on withdrawal) -> Cash In
             db.savings
                 .filter(s => s.status === 'approved' && s.transaction_type !== 'withdraw' && !String(s.payment_method || '').includes('Interest') && !String(s.payment_method || '').includes('Auto-Yield'))
                 .forEach(s => {
@@ -2802,11 +2909,11 @@
                         category: 'Member Savings Deposit',
                         description: `${s.member_name} (${s.payment_method})`,
                         cashIn: Number(s.amount || 0),
-                        cashOut: 0
+                        cashOut: 0,
+                        cfId: null
                     });
                 });
 
-            // 3. Approved Savings & Investor Interest Withdrawals -> Cash Out
             db.savings
                 .filter(s => s.status === 'approved' && s.transaction_type === 'withdraw')
                 .forEach(s => {
@@ -2815,11 +2922,11 @@
                         category: 'Savings / Yield Withdrawal',
                         description: `${s.member_name} (${s.payment_method})`,
                         cashIn: 0,
-                        cashOut: Number(s.amount || 0)
+                        cashOut: Number(s.amount || 0),
+                        cfId: null
                     });
                 });
 
-            // 4. Loans Disbursed (Cash Out) & Loan Payments Collected (Cash In)
             db.loans
                 .filter(l => l.status === 'approved' || l.status === 'paid')
                 .forEach(l => {
@@ -2829,7 +2936,8 @@
                         category: 'Loan Released (Disbursed)',
                         description: `${l.applicant_name} — ${l.loan_type === 'balloon' ? 'Balloon' : 'Amortized'}`,
                         cashIn: 0,
-                        cashOut: Number(l.amount || 0)
+                        cashOut: Number(l.amount || 0),
+                        cfId: null
                     });
 
                     const paidAmt = Number(l.amount_paid || 0);
@@ -2839,23 +2947,23 @@
                             category: 'Loan Payment Collected',
                             description: `${l.applicant_name} — Hulog / Interest Collected`,
                             cashIn: paidAmt,
-                            cashOut: 0
+                            cashOut: 0,
+                            cfId: null
                         });
                     }
                 });
 
-            // 5. Admin Manual Business Cashflow Entries
             (db.cashflow || []).forEach(cf => {
                 entries.push({
                     date: cf.entry_date || getTodayStr(),
                     category: cf.category,
                     description: cf.description || (cf.entry_type === 'in' ? 'Manual Cash In' : 'Manual Cash Out'),
                     cashIn: cf.entry_type === 'in' ? Number(cf.amount || 0) : 0,
-                    cashOut: cf.entry_type === 'out' ? Number(cf.amount || 0) : 0
+                    cashOut: cf.entry_type === 'out' ? Number(cf.amount || 0) : 0,
+                    cfId: cf.id
                 });
             });
 
-            // Sort chronologically ascending to calculate running balance & monthly growth
             entries.sort((a, b) => new Date(a.date) - new Date(b.date));
 
             let runningBal = 0;
@@ -2868,7 +2976,7 @@
                 totalOut += item.cashOut;
                 runningBal += (item.cashIn - item.cashOut);
 
-                const monthKey = (item.date || getTodayStr()).slice(0, 7); // YYYY-MM
+                const monthKey = (item.date || getTodayStr()).slice(0, 7);
                 if (!monthlyMap[monthKey]) {
                     monthlyMap[monthKey] = { in: 0, out: 0, endingBalance: runningBal };
                 }
@@ -2879,7 +2987,6 @@
                 return { ...item, runningBalance: runningBal };
             });
 
-            // Update KPIs
             document.getElementById('admin-kpi-net-cash').textContent = formatPHP(runningBal);
             document.getElementById('cf-total-in').textContent = formatPHP(totalIn);
             document.getElementById('cf-total-out').textContent = formatPHP(totalOut);
@@ -2901,10 +3008,9 @@
                 growthCaption.textContent = 'Total loans/withdrawals released exceed recorded cash inflows.';
             }
 
-            // Render Cashflow Ledger (Newest first)
             const cfTbody = document.getElementById('admin-cashflow-tbody');
             if (enriched.length === 0) {
-                cfTbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 text-xs">No cashflow transactions yet. Approve deposits/loans or record starting capital above.</td></tr>`;
+                cfTbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 text-xs">No cashflow transactions yet. Approve deposits/loans or record starting capital above.</td></tr>`;
             } else {
                 cfTbody.innerHTML = [...enriched].reverse().map(row => `
                     <tr class="hover:bg-slate-50 transition">
@@ -2914,11 +3020,15 @@
                         <td class="py-3 px-3 text-right font-bold text-emerald-600">${row.cashIn > 0 ? '+' + formatPHP(row.cashIn) : '—'}</td>
                         <td class="py-3 px-3 text-right font-bold text-rose-600">${row.cashOut > 0 ? '-' + formatPHP(row.cashOut) : '—'}</td>
                         <td class="py-3 px-3 text-right font-extrabold ${row.runningBalance >= 0 ? 'text-slate-900' : 'text-rose-700'}">${formatPHP(row.runningBalance)}</td>
+                        <td class="py-3 px-3 text-right">
+                            ${row.cfId
+                                ? `<button onclick="deleteHistoryRecord('business_cashflow', '${row.cfId}')" class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white text-xs font-bold transition" title="Delete Entry"><i class="fa-solid fa-trash"></i></button>`
+                                : `<span class="text-[10px] text-slate-400">Auto</span>`}
+                        </td>
                     </tr>
                 `).join('');
             }
 
-            // Render Chart.js Business Growth Chart
             const sortedMonths = Object.keys(monthlyMap).sort();
             const labels = sortedMonths.length > 0 ? sortedMonths : [getTodayStr().slice(0, 7)];
             const cashInSeries = sortedMonths.length > 0 ? sortedMonths.map(m => monthlyMap[m].in) : [0];
@@ -3018,7 +3128,12 @@
                 entry_date: entryDate
             }]);
 
-            if (error) return showToast(error.message, 'error');
+            if (error) {
+                if (error.message.toLowerCase().includes('permission denied')) {
+                    return showToast('Permission denied: Please run the GRANT ALL SQL script in Supabase SQL Editor first.', 'error');
+                }
+                return showToast(error.message, 'error');
+            }
 
             e.target.reset();
             document.getElementById('cf-entry-date').value = getTodayStr();
@@ -3048,10 +3163,9 @@
             document.getElementById('admin-badge-savings').textContent = pendingSavingsCount;
             document.getElementById('admin-badge-deposits').textContent = pendingDepositsCount;
 
-            // 0. Compute & Render Business Cashflow & Growth Chart
             computeAndRenderAdminCashflow(db);
 
-            // 1. Member Accounts Table
+            // 1. Member Accounts Table (With SOA Print Button + Edit Account)
             const membersTbody = document.getElementById('admin-members-tbody');
             membersTbody.innerHTML = db.profiles.map(member => {
                 const roleBadge = member.role === 'investor'
@@ -3077,16 +3191,19 @@
                         <td class="py-3.5 px-3 font-semibold text-sky-700">${formatPHP(member.savings_balance)}</td>
                         <td class="py-3.5 px-3 font-bold text-emerald-700">${formatPHP(member.invested_capital)}</td>
                         <td class="py-3.5 px-3 font-bold text-indigo-600">${formatPHP(member.accrued_earnings)}</td>
-                        <td class="py-3.5 px-3 text-right">
+                        <td class="py-3.5 px-3 text-right whitespace-nowrap space-x-1">
+                            <button onclick="openMemberSOAModal('${member.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition shadow-sm" title="View & Print SOA">
+                                <i class="fa-solid fa-print"></i> SOA
+                            </button>
                             <button onclick="openEditModal('${member.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white text-xs font-bold transition shadow-sm">
-                                <i class="fa-solid fa-pen-to-square"></i> Edit Account
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
                             </button>
                         </td>
                     </tr>
                 `;
             }).join('');
 
-            // 2. Loans Management Table
+            // 2. Loans Management Table (With Synced Delete Button)
             const loansTbody = document.getElementById('admin-loans-tbody');
             if (db.loans.length === 0) {
                 loansTbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 text-xs">No loan records found.</td></tr>`;
@@ -3101,7 +3218,7 @@
                     const paid = Number(loan.amount_paid || 0);
                     const rem = loan.remaining_balance !== null && loan.remaining_balance !== undefined ? Number(loan.remaining_balance) : Number(loan.total_due);
 
-                    let actionButtons = '<span class="text-xs text-slate-400">Completed</span>';
+                    let actionButtons = '';
                     if (loan.status === 'pending') {
                         actionButtons = `
                             <button onclick="approveAndReleaseLoan('${loan.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">Approve & Release</button>
@@ -3120,6 +3237,8 @@
                             `;
                         }
                     }
+
+                    const deleteBtn = `<button onclick="deleteHistoryRecord('loans', '${loan.id}')" class="px-2 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white text-xs font-bold transition" title="Delete History (Admin, User & Investor)"><i class="fa-solid fa-trash"></i></button>`;
 
                     return `
                         <tr class="hover:bg-slate-50 transition">
@@ -3140,13 +3259,13 @@
                             </td>
                             <td class="py-3.5 px-3 text-xs font-bold text-amber-700">${loan.due_date || 'Pending Release'}</td>
                             <td class="py-3.5 px-3">${getStatusBadge(loan.status)}</td>
-                            <td class="py-3.5 px-3 text-right space-x-1 whitespace-nowrap">${actionButtons}</td>
+                            <td class="py-3.5 px-3 text-right space-x-1 whitespace-nowrap">${actionButtons} ${deleteBtn}</td>
                         </tr>
                     `;
                 }).join('');
             }
 
-            // 3. Savings Deposits & Withdrawals Table
+            // 3. Savings Deposits & Withdrawals Table (With Synced Delete Button)
             const savingsTbody = document.getElementById('admin-savings-tbody');
             if (db.savings.length === 0) {
                 savingsTbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 text-xs">No savings deposit or withdrawal requests yet.</td></tr>`;
@@ -3156,6 +3275,8 @@
                     const txBadge = isWithdraw
                         ? '<span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-amber-100 text-amber-800">Withdraw (1–2 Days)</span>'
                         : '<span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-sky-100 text-sky-800">Deposit</span>';
+
+                    const deleteBtn = `<button onclick="deleteHistoryRecord('savings_deposits', '${sav.id}')" class="px-2 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white text-xs font-bold transition" title="Delete History & Adjust Balance"><i class="fa-solid fa-trash"></i></button>`;
 
                     return `
                         <tr class="hover:bg-slate-50 transition">
@@ -3174,14 +3295,15 @@
                                         ${isWithdraw ? 'Approve & Deduct' : 'Approve & Credit'}
                                     </button>
                                     <button onclick="processSavingsTransaction('${sav.id}', 'rejected')" class="px-2.5 py-1.5 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold">Reject</button>
-                                ` : `<span class="text-xs text-slate-400">Processed</span>`}
+                                ` : ''}
+                                ${deleteBtn}
                             </td>
                         </tr>
                     `;
                 }).join('');
             }
 
-            // 4. Investor Deposits Table (with 1-Year Lock & Next 1% Auto-Payout)
+            // 4. Investor Deposits Table (With Synced Delete Button)
             const depositsTbody = document.getElementById('admin-deposits-tbody');
             if (db.investments.length === 0) {
                 depositsTbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 text-xs">No investment deposit requests found.</td></tr>`;
@@ -3190,6 +3312,7 @@
                     const isApproved = dep.status === 'approved';
                     const effDate = dep.effective_date || (dep.created_at || '').split('T')[0];
                     const matDate = dep.maturity_date || addYearsToDateStr(effDate, 1);
+                    const deleteBtn = `<button onclick="deleteHistoryRecord('investments', '${dep.id}')" class="px-2 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white text-xs font-bold transition" title="Delete Investment History (Admin & Investor)"><i class="fa-solid fa-trash"></i></button>`;
 
                     return `
                         <tr class="hover:bg-slate-50 transition">
@@ -3206,12 +3329,156 @@
                                 ${dep.status === 'pending' ? `
                                     <button onclick="approveInvestorDeposit('${dep.id}', 'approved')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">Approve & Lock 1 Yr</button>
                                     <button onclick="approveInvestorDeposit('${dep.id}', 'rejected')" class="px-2.5 py-1.5 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold">Reject</button>
-                                ` : `<span class="text-xs text-slate-400">Active (1%/mo Auto)</span>`}
+                                ` : ''}
+                                ${deleteBtn}
                             </td>
                         </tr>
                     `;
                 }).join('');
             }
+        }
+
+        // ===================================================================
+        // SYNCED DELETE HISTORY (ADMIN -> USER & INVESTOR + BALANCE ROLLBACK)
+        // ===================================================================
+        async function deleteHistoryRecord(tableName, recordId) {
+            if (!confirm('Sigurado ka bang buburahin ang record na ito? Mabubura rin ito sa account ng User/Investor at ia-adjust ang balance kung approved na.')) {
+                return;
+            }
+
+            if (tableName === 'savings_deposits') {
+                const { data: sav } = await supabaseClient.from('savings_deposits').select('*').eq('id', recordId).single();
+                if (sav && sav.status === 'approved') {
+                    const { data: prof } = await supabaseClient.from('profiles').select('savings_balance, accrued_earnings').eq('id', sav.user_id).single();
+                    if (prof) {
+                        const curBal = Number(prof.savings_balance || 0);
+                        const revertedBal = sav.transaction_type === 'withdraw'
+                            ? curBal + Number(sav.amount)
+                            : Math.max(0, curBal - Number(sav.amount));
+                        const updates = { savings_balance: revertedBal };
+                        if (String(sav.payment_method || '').includes('Investor Auto-Yield')) {
+                            updates.accrued_earnings = Math.max(0, Number(prof.accrued_earnings || 0) - Number(sav.amount));
+                        }
+                        await supabaseClient.from('profiles').update(updates).eq('id', sav.user_id);
+                    }
+                }
+            } else if (tableName === 'investments') {
+                const { data: inv } = await supabaseClient.from('investments').select('*').eq('id', recordId).single();
+                if (inv && inv.status === 'approved') {
+                    const { data: prof } = await supabaseClient.from('profiles').select('invested_capital').eq('id', inv.investor_id).single();
+                    if (prof) {
+                        const revertedCap = Math.max(0, Number(prof.invested_capital || 0) - Number(inv.amount));
+                        await supabaseClient.from('profiles').update({ invested_capital: revertedCap }).eq('id', inv.investor_id);
+                    }
+                }
+            }
+
+            const { error } = await supabaseClient.from(tableName).delete().eq('id', recordId);
+            if (error) {
+                return showToast('Delete failed: ' + error.message, 'error');
+            }
+
+            showToast('Record deleted across Admin, User, and Investor views!', 'success');
+            await renderActiveDashboard();
+        }
+
+        // ===================================================================
+        // PRINTABLE STATEMENT OF ACCOUNT (SOA) PER USER & INVESTOR
+        // ===================================================================
+        async function openMemberSOAModal(memberId) {
+            const db = await fetchAllData();
+            const member = db.profiles.find(p => p.id === memberId);
+            if (!member) return showToast('Member record not found.', 'error');
+
+            document.getElementById('soa-date-generated').textContent = new Date().toLocaleDateString('en-PH', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+            document.getElementById('soa-member-name').textContent = member.full_name;
+            document.getElementById('soa-member-role').textContent = member.role === 'user' ? 'Borrower Account' : member.role.toUpperCase();
+            document.getElementById('soa-member-contact').textContent = member.contact_number || member.email;
+            document.getElementById('soa-member-address').textContent = member.address || 'No address on file';
+            document.getElementById('soa-savings-bal').textContent = formatPHP(member.savings_balance);
+            document.getElementById('soa-credit-score').textContent = member.credit_score;
+            document.getElementById('soa-sign-member').textContent = member.full_name;
+
+            const myLoans = db.loans.filter(l => l.user_id === member.id);
+            const mySavings = db.savings.filter(s => s.user_id === member.id);
+            const myInvestments = db.investments.filter(i => i.investor_id === member.id);
+
+            if (member.role === 'investor') {
+                document.getElementById('soa-kpi4-label').textContent = 'Invested Capital (1-Yr Lock)';
+                document.getElementById('soa-kpi4-value').textContent = formatPHP(member.invested_capital);
+                document.getElementById('soa-kpi4-value').className = 'font-extrabold text-sm text-emerald-700 mt-0.5';
+                document.getElementById('soa-kpi4-sub').textContent = 'Total Accrued Yield: ' + formatPHP(member.accrued_earnings);
+            } else {
+                const activeRem = myLoans
+                    .filter(l => l.status === 'approved')
+                    .reduce((sum, l) => sum + Number(l.remaining_balance ?? l.total_due), 0);
+                document.getElementById('soa-kpi4-label').textContent = 'Remaining Loan Balance';
+                document.getElementById('soa-kpi4-value').textContent = formatPHP(activeRem);
+                document.getElementById('soa-kpi4-value').className = 'font-extrabold text-sm text-rose-700 mt-0.5';
+                document.getElementById('soa-kpi4-sub').textContent = 'Max Credit Limit: ' + formatPHP(member.loan_limit);
+            }
+
+            const rows = [];
+
+            myLoans.forEach(l => {
+                rows.push({
+                    date: l.received_date || (l.created_at || '').split('T')[0],
+                    type: `Loan (${l.loan_type === 'balloon' ? 'Balloon 7%' : 'Amortized'})`,
+                    details: `${l.purpose} • Paid: ${formatPHP(l.amount_paid || 0)} | Rem: ${formatPHP(l.remaining_balance ?? l.total_due)}`,
+                    amount: formatPHP(l.amount),
+                    status: l.status.toUpperCase()
+                });
+            });
+
+            mySavings.forEach(s => {
+                const isW = s.transaction_type === 'withdraw';
+                rows.push({
+                    date: (s.created_at || '').split('T')[0],
+                    type: isW ? 'Savings Withdrawal' : 'Savings / Yield Credit',
+                    details: `${s.payment_method}${s.reference_no ? ' (' + s.reference_no + ')' : ''}`,
+                    amount: `${isW ? '-' : '+'}${formatPHP(s.amount)}`,
+                    status: s.status.toUpperCase()
+                });
+            });
+
+            myInvestments.forEach(i => {
+                rows.push({
+                    date: i.effective_date || (i.created_at || '').split('T')[0],
+                    type: 'Capital Investment (1-Yr Lock)',
+                    details: `Ref: ${i.reference_no || 'N/A'} • Unlock: ${i.maturity_date || 'Pending'}`,
+                    amount: formatPHP(i.amount),
+                    status: i.status.toUpperCase()
+                });
+            });
+
+            rows.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const soaTbody = document.getElementById('soa-transactions-tbody');
+            if (rows.length === 0) {
+                soaTbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">No transaction history recorded for this member.</td></tr>`;
+            } else {
+                soaTbody.innerHTML = rows.map(r => `
+                    <tr>
+                        <td class="py-2 px-3 border-r border-slate-200 whitespace-nowrap">${r.date}</td>
+                        <td class="py-2 px-3 border-r border-slate-200 font-bold">${r.type}</td>
+                        <td class="py-2 px-3 border-r border-slate-200 text-slate-600">${r.details}</td>
+                        <td class="py-2 px-3 border-r border-slate-200 text-right font-extrabold">${r.amount}</td>
+                        <td class="py-2 px-3 text-right font-bold text-[10px]">${r.status}</td>
+                    </tr>
+                `).join('');
+            }
+
+            const modal = document.getElementById('soa-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeSOAModal() {
+            const modal = document.getElementById('soa-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
 
         // Admin Loan Actions
