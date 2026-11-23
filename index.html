@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BayanFund — Lending & Investment Portal</title>
+    <title>BayanFund & Investment Portal</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter -->
@@ -172,8 +172,8 @@
         <!-- =================================================================
              2. BORROWER (USER) DASHBOARD
                 - Balloon Payment Loan (7% / mo, No Terms, Auto Due Date)
-                - Amortized Loan (5% / mo, Deducted Installments)
-                - Savings Deposit (Cash / Online Transfer, Admin Approved, 4% p.a.)
+                - Amortized Loan (Daily / Weekly / Bi-Weekly / Monthly, Principal & Payment Due only)
+                - Savings Wallet (Deposit Dashboard + Withdraw Dashboard w/ 1-2 working days)
         ================================================================== -->
         <section id="user-dashboard" class="hidden space-y-6 w-full self-start">
             <!-- Welcome Header -->
@@ -183,7 +183,7 @@
                         <i class="fa-solid fa-user-check"></i> Member Financial Portal
                     </span>
                     <h2 class="text-2xl font-extrabold text-slate-900">Welcome, <span id="user-welcome-name">Member</span></h2>
-                    <p class="text-sm text-slate-500">Choose between Balloon Payment Loan (7%/mo), Amortized Loan (5%/mo), or your Savings Wallet (4% p.a.).</p>
+                    <p class="text-sm text-slate-500">Manage your Balloon Payment Loan, Amortized Loan, and Savings Wallet (Deposit & Withdraw).</p>
                 </div>
                 <div class="flex items-center gap-3 bg-slate-50 px-4 py-3 rounded-2xl border border-slate-200">
                     <div class="text-right">
@@ -263,7 +263,7 @@
                     <i class="fa-solid fa-calendar-check text-emerald-600"></i>
                     <div class="text-left">
                         <div>Amortized Loan</div>
-                        <div class="text-[11px] font-medium text-slate-400">5% / mo • Deducted Hulog</div>
+                        <div class="text-[11px] font-medium text-slate-400">Daily / Weekly / Bi-Weekly / Monthly</div>
                     </div>
                 </button>
 
@@ -271,7 +271,7 @@
                     <i class="fa-solid fa-piggy-bank text-sky-600"></i>
                     <div class="text-left">
                         <div>Savings Wallet</div>
-                        <div class="text-[11px] font-medium text-slate-400">Cash / Online • 4% p.a.</div>
+                        <div class="text-[11px] font-medium text-slate-400">Deposit & Withdraw • 4% p.a.</div>
                     </div>
                 </button>
             </div>
@@ -280,7 +280,7 @@
                  TAB 1: BALLOON PAYMENT LOAN DASHBOARD (7% / mo, No Terms)
             ============================================================== -->
             <div id="user-panel-balloon" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Apply for Balloon Loan Card -->
+                <!-- Balloon Loan Calculator Card (Opens Standard Loan Application Form) -->
                 <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-amber-200 shadow-sm">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg">
@@ -297,20 +297,15 @@
                         <ul class="list-disc pl-4 space-y-0.5 text-[11px]">
                             <li><strong>7% per month</strong> ang interest ng principal amount.</li>
                             <li><strong>Walang fixed terms</strong> — buwan-buwan lang ang hulog ng 7% interest hanggang mabayaran ang buong principal.</li>
-                            <li><strong>Auto Due Date:</strong> Automatic na magsisimula ang 1-month due date ng interest pagkatapos ma-approve at matanggap ang pera.</li>
+                            <li><strong>Auto Due Date:</strong> Automatic na magsisimula ang 1-month due date ng interest pagkatapos matanggap ang pera.</li>
                         </ul>
                     </div>
 
-                    <form onsubmit="submitBalloonLoan(event)" class="space-y-4">
+                    <form onsubmit="proceedToLoanForm(event, 'balloon')" class="space-y-4">
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Principal Amount (₱)</label>
                             <input type="number" id="balloon-amount" min="500" step="100" required oninput="calculateBalloonPreview()" placeholder="5000" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none font-bold text-slate-900">
                             <p class="text-[11px] text-slate-400 mt-1">Available limit: <span id="balloon-limit-hint" class="font-bold text-emerald-600">₱0.00</span></p>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Loan Purpose</label>
-                            <input type="text" id="balloon-purpose" required placeholder="e.g., Rolling capital / emergency funds" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-amber-500 outline-none text-sm">
                         </div>
 
                         <!-- Balloon Auto-Computation Box -->
@@ -329,8 +324,9 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="w-full py-3.5 px-4 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-md shadow-amber-600/20 transition">
-                            Apply for Balloon Loan
+                        <button type="submit" class="w-full py-3.5 px-4 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-md shadow-amber-600/20 transition flex items-center justify-center gap-2">
+                            <span>Proceed to Loan Application Form</span>
+                            <i class="fa-solid fa-file-signature"></i>
                         </button>
                     </form>
                 </div>
@@ -353,19 +349,20 @@
                                     <th class="py-3 px-2 text-right">Status</th>
                                 </tr>
                             </thead>
-                            <tbody id="user-balloon-tbody" class="divide-y divide-slate-100 text-sm">
-                                <!-- Populated via JS -->
-                            </tbody>
+                            <tbody id="user-balloon-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
             <!-- =============================================================
-                 TAB 2: AMORTIZED LOAN DASHBOARD (5% / mo, Deducted Hulog)
+                 TAB 2: AMORTIZED LOAN DASHBOARD
+                        - Principal Amount & Payment Due ONLY in Calculator
+                        - Terms + Payment Method (Daily, Weekly, Bi-Weekly, Monthly)
+                        - Proceeds to Standard Loan Application Form Modal
             ============================================================== -->
             <div id="user-panel-amortized" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Apply for Amortized Loan Card -->
+                <!-- Amortized Loan Calculator Card -->
                 <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-emerald-200 shadow-sm">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
@@ -373,55 +370,55 @@
                         </div>
                         <div>
                             <h3 class="font-bold text-lg text-slate-900">Amortized Loan</h3>
-                            <p class="text-xs font-semibold text-emerald-700">5% Monthly Interest • Deducted Installments</p>
+                            <p class="text-xs font-semibold text-emerald-700">Flexible Schedule • Deducted Installments</p>
                         </div>
                     </div>
 
-                    <form onsubmit="submitAmortizedLoan(event)" class="space-y-4">
+                    <form onsubmit="proceedToLoanForm(event, 'amortized')" class="space-y-4">
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Loan Amount (₱)</label>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Principal Amount (₱)</label>
                             <input type="number" id="amort-amount" min="500" step="100" required oninput="calculateAmortizedPreview()" placeholder="5000" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none font-bold text-slate-900">
                             <p class="text-[11px] text-slate-400 mt-1">Available limit: <span id="amort-limit-hint" class="font-bold text-emerald-600">₱0.00</span></p>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Payment Term</label>
-                            <select id="amort-term" onchange="calculateAmortizedPreview()" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-medium bg-white">
-                                <option value="1">1 Month (5% Total Interest)</option>
-                                <option value="2">2 Months (10% Total Interest)</option>
-                                <option value="3" selected>3 Months (15% Total Interest)</option>
-                                <option value="6">6 Months (30% Total Interest)</option>
-                                <option value="12">12 Months (60% Total Interest)</option>
-                            </select>
-                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Payment Terms</label>
+                                <select id="amort-term" onchange="calculateAmortizedPreview()" class="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-medium bg-white">
+                                    <option value="1">1 Month</option>
+                                    <option value="2">2 Months</option>
+                                    <option value="3" selected>3 Months</option>
+                                    <option value="6">6 Months</option>
+                                    <option value="12">12 Months</option>
+                                </select>
+                            </div>
 
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Loan Purpose</label>
-                            <input type="text" id="amort-purpose" required placeholder="e.g., Store inventory / appliance" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm">
-                        </div>
-
-                        <!-- Amortized Auto-Computation Box -->
-                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-2 text-xs">
-                            <div class="flex justify-between text-slate-600">
-                                <span>Principal Amount:</span>
-                                <span id="amort-calc-principal" class="font-bold">₱0.00</span>
-                            </div>
-                            <div class="flex justify-between text-slate-600">
-                                <span>Total Interest (5%/mo):</span>
-                                <span id="amort-calc-interest" class="font-bold text-amber-600">₱0.00</span>
-                            </div>
-                            <div class="flex justify-between text-slate-700 font-bold">
-                                <span>Total Payable:</span>
-                                <span id="amort-calc-total">₱0.00</span>
-                            </div>
-                            <div class="pt-2 border-t border-slate-200 flex justify-between text-sm font-extrabold text-slate-900">
-                                <span>Monthly Hulog (Installment):</span>
-                                <span id="amort-calc-monthly" class="text-emerald-600">₱0.00 / mo</span>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Payment Method</label>
+                                <select id="amort-frequency" onchange="calculateAmortizedPreview()" class="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-bold text-emerald-800 bg-white">
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="bi-weekly">Bi-Weekly</option>
+                                    <option value="monthly" selected>Monthly</option>
+                                </select>
                             </div>
                         </div>
 
-                        <button type="submit" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md shadow-emerald-600/20 transition">
-                            Apply for Amortized Loan
+                        <!-- Clean Amortized Calculator Box (Principal Amount & Payment Due ONLY) -->
+                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-2.5 text-xs">
+                            <div class="flex justify-between items-center text-slate-600">
+                                <span class="font-semibold">Principal Amount:</span>
+                                <span id="amort-calc-principal" class="font-bold text-sm text-slate-900">₱0.00</span>
+                            </div>
+                            <div class="pt-2.5 border-t border-slate-200 flex justify-between items-center text-sm font-extrabold text-slate-900">
+                                <span id="amort-calc-due-label">Payment Due (Monthly):</span>
+                                <span id="amort-calc-due" class="text-base text-emerald-600">₱0.00</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+                            <span>Proceed to Loan Application Form</span>
+                            <i class="fa-solid fa-file-signature"></i>
                         </button>
                     </form>
                 </div>
@@ -430,108 +427,193 @@
                 <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col">
                     <div class="mb-4">
                         <h3 class="font-bold text-lg text-slate-900">My Amortized Loans</h3>
-                        <p class="text-xs text-slate-500">Every monthly installment (hulog) is automatically deducted from your Remaining Balance.</p>
+                        <p class="text-xs text-slate-500">Every payment (hulog) is automatically deducted from your Remaining Balance.</p>
                     </div>
 
                     <div class="overflow-x-auto flex-grow">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                                    <th class="py-3 px-2">Purpose / Term</th>
-                                    <th class="py-3 px-2">Monthly Hulog</th>
+                                    <th class="py-3 px-2">Purpose / Schedule</th>
+                                    <th class="py-3 px-2">Payment Due</th>
                                     <th class="py-3 px-2">Paid (Nabawas)</th>
                                     <th class="py-3 px-2">Remaining Bal.</th>
                                     <th class="py-3 px-2">Next Due</th>
                                     <th class="py-3 px-2 text-right">Status</th>
                                 </tr>
                             </thead>
-                            <tbody id="user-amort-tbody" class="divide-y divide-slate-100 text-sm">
-                                <!-- Populated via JS -->
-                            </tbody>
+                            <tbody id="user-amort-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
             <!-- =============================================================
-                 TAB 3: SAVINGS WALLET DASHBOARD (Cash / Online Transfer, 4% p.a.)
+                 TAB 3: SAVINGS WALLET (2 DASHBOARDS: DEPOSIT & WITHDRAW)
             ============================================================== -->
-            <div id="user-panel-savings" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Deposit Savings Form -->
-                <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-sky-200 shadow-sm">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center text-lg">
-                            <i class="fa-solid fa-piggy-bank"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-lg text-slate-900">Add Savings Deposit</h3>
-                            <p class="text-xs font-semibold text-sky-700">Earn 4.00% Interest Per Annum (Monthly Crediting)</p>
-                        </div>
-                    </div>
-
-                    <div class="mb-4 p-3.5 rounded-2xl bg-sky-50 border border-sky-200 text-xs text-sky-900 space-y-1">
-                        <div class="flex justify-between font-bold">
-                            <span>Current Verified Savings:</span>
-                            <span id="savings-tab-balance">₱0.00</span>
-                        </div>
-                        <div class="flex justify-between text-[11px]">
-                            <span>Est. Monthly Interest (4% p.a. ÷ 12):</span>
-                            <span id="savings-tab-interest" class="font-bold text-emerald-700">+₱0.00 / mo</span>
+            <div id="user-panel-savings" class="hidden space-y-6">
+                <!-- Savings Wallet Top Banner + 2 Sub-Dashboard Switcher -->
+                <div class="bg-white rounded-3xl p-5 sm:p-6 border border-sky-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-wider text-sky-600">Verified Savings Wallet • 4.00% p.a.</div>
+                        <div class="flex items-baseline gap-3 mt-1">
+                            <span id="savings-tab-balance" class="text-2xl sm:text-3xl font-black text-slate-900">₱0.00</span>
+                            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+                                Est. Monthly Yield: <span id="savings-tab-interest">+₱0.00</span>
+                            </span>
                         </div>
                     </div>
 
-                    <form onsubmit="submitSavingsDeposit(event)" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Deposit Method</label>
-                            <select id="savings-method" onchange="toggleSavingsRefField()" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-sky-500 outline-none text-sm font-semibold bg-white">
-                                <option value="Cash">Cash (Handover / Over-the-Counter)</option>
-                                <option value="Online Transfer">Online Transfer (GCash / Maya / Bank)</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Deposit Amount (₱)</label>
-                            <input type="number" id="savings-amount" min="100" step="50" required placeholder="1000" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-sky-500 outline-none font-bold text-slate-900">
-                        </div>
-
-                        <div>
-                            <label id="savings-ref-label" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Notes / Receipt Info (Optional for Cash)</label>
-                            <input type="text" id="savings-ref" placeholder="e.g., Cash handed to Admin / GCash Ref #12345" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-sky-500 outline-none text-sm">
-                        </div>
-
-                        <p class="text-[11px] text-slate-500">
-                            <i class="fa-solid fa-clock text-amber-500 mr-1"></i>
-                            Subject to <strong>Admin approval</strong> before the deposit is added to your Savings Balance.
-                        </p>
-
-                        <button type="submit" class="w-full py-3.5 px-4 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl shadow-md shadow-sky-600/20 transition">
-                            Submit Savings Deposit
+                    <!-- 2 Savings Sub-Dashboards Switcher: DEPOSIT vs WITHDRAW -->
+                    <div class="flex gap-2 bg-slate-100 p-1.5 rounded-2xl">
+                        <button id="sav-subtab-deposit" onclick="switchSavingsSubTab('deposit')" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-sky-600 text-white shadow-sm transition flex items-center gap-2">
+                            <i class="fa-solid fa-circle-arrow-down"></i>
+                            <span>Deposit Dashboard</span>
                         </button>
-                    </form>
+                        <button id="sav-subtab-withdraw" onclick="switchSavingsSubTab('withdraw')" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold text-slate-600 hover:bg-white/70 transition flex items-center gap-2">
+                            <i class="fa-solid fa-circle-arrow-up text-amber-600"></i>
+                            <span>Withdraw Dashboard</span>
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Savings History Table -->
-                <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col">
-                    <div class="mb-4">
-                        <h3 class="font-bold text-lg text-slate-900">Savings Deposit & Interest History</h3>
-                        <p class="text-xs text-slate-500">Track your Cash & Online Transfer deposits and verification status.</p>
+                <!-- SUB-DASHBOARD A: SAVINGS DEPOSIT (Cash / Online Transfer) -->
+                <div id="sav-panel-deposit" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-sky-200 shadow-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-circle-arrow-down"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg text-slate-900">Deposit Savings</h3>
+                                <p class="text-xs font-semibold text-sky-700">Cash or Online Transfer • Subject to Admin Approval</p>
+                            </div>
+                        </div>
+
+                        <form onsubmit="submitSavingsDeposit(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Deposit Method</label>
+                                <select id="savings-method" onchange="toggleSavingsRefField()" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-sky-500 outline-none text-sm font-semibold bg-white">
+                                    <option value="Cash">Cash (Handover / Over-the-Counter)</option>
+                                    <option value="Online Transfer">Online Transfer (GCash / Maya / Bank)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Deposit Amount (₱)</label>
+                                <input type="number" id="savings-amount" min="100" step="50" required placeholder="1000" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-sky-500 outline-none font-bold text-slate-900">
+                            </div>
+
+                            <div>
+                                <label id="savings-ref-label" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Notes / Receipt Info (Optional for Cash)</label>
+                                <input type="text" id="savings-ref" placeholder="e.g., Cash handed to Admin" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-sky-500 outline-none text-sm">
+                            </div>
+
+                            <p class="text-[11px] text-slate-500">
+                                <i class="fa-solid fa-clock text-amber-500 mr-1"></i>
+                                Deposit requires <strong>Admin approval</strong> before it is credited to your Savings Balance.
+                            </p>
+
+                            <button type="submit" class="w-full py-3.5 px-4 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl shadow-md shadow-sky-600/20 transition">
+                                Submit Savings Deposit
+                            </button>
+                        </form>
                     </div>
 
-                    <div class="overflow-x-auto flex-grow">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                                    <th class="py-3 px-2">Date</th>
-                                    <th class="py-3 px-2">Method</th>
-                                    <th class="py-3 px-2">Reference / Notes</th>
-                                    <th class="py-3 px-2">Amount</th>
-                                    <th class="py-3 px-2 text-right">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="user-savings-tbody" class="divide-y divide-slate-100 text-sm">
-                                <!-- Populated via JS -->
-                            </tbody>
-                        </table>
+                    <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col">
+                        <div class="mb-4">
+                            <h3 class="font-bold text-lg text-slate-900">Deposit & Monthly Interest History</h3>
+                            <p class="text-xs text-slate-500">Track your Cash, Online Transfer deposits, and 4% p.a. monthly interest credits.</p>
+                        </div>
+
+                        <div class="overflow-x-auto flex-grow">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                        <th class="py-3 px-2">Date</th>
+                                        <th class="py-3 px-2">Method</th>
+                                        <th class="py-3 px-2">Reference / Notes</th>
+                                        <th class="py-3 px-2">Amount</th>
+                                        <th class="py-3 px-2 text-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="user-savings-deposit-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-DASHBOARD B: SAVINGS WITHDRAW (1-2 Working Days Processing until Admin Approved) -->
+                <div id="sav-panel-withdraw" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-amber-200 shadow-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-circle-arrow-up"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg text-slate-900">Withdraw Savings</h3>
+                                <p class="text-xs font-semibold text-amber-700">1–2 Working Days Processing • Admin Approval</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-4 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1">
+                            <div class="font-bold"><i class="fa-solid fa-hourglass-half mr-1"></i> Withdrawal Processing Notice:</div>
+                            <p class="text-[11px] leading-relaxed">
+                                Ang pag-withdraw ng savings ay may <strong>1–2 working days</strong> processing time bago ma-release at ma-approve ng Administrator.
+                            </p>
+                            <div class="pt-1 flex justify-between font-bold text-slate-800 border-t border-amber-200/70">
+                                <span>Available to Withdraw:</span>
+                                <span id="withdraw-available-hint" class="text-emerald-700">₱0.00</span>
+                            </div>
+                        </div>
+
+                        <form onsubmit="submitSavingsWithdrawal(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Withdrawal Amount (₱)</label>
+                                <input type="number" id="withdraw-amount" min="100" step="50" required placeholder="1000" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-amber-500 outline-none font-bold text-slate-900">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Receiving Method</label>
+                                <select id="withdraw-method" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-amber-500 outline-none text-sm font-semibold bg-white">
+                                    <option value="Cash Pickup">Cash Pickup</option>
+                                    <option value="GCash">GCash Transfer</option>
+                                    <option value="Maya">Maya Transfer</option>
+                                    <option value="Bank Transfer">Bank Transfer</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Account Name & Number / Pickup Details</label>
+                                <input type="text" id="withdraw-account" required placeholder="e.g., Juan Dela Cruz - 0917 123 4567" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-amber-500 outline-none text-sm">
+                            </div>
+
+                            <button type="submit" class="w-full py-3.5 px-4 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-md shadow-amber-600/20 transition">
+                                Request Savings Withdrawal
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col">
+                        <div class="mb-4">
+                            <h3 class="font-bold text-lg text-slate-900">Withdrawal Request History</h3>
+                            <p class="text-xs text-slate-500">Processing takes 1–2 working days until approved and released by the Administrator.</p>
+                        </div>
+
+                        <div class="overflow-x-auto flex-grow">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                        <th class="py-3 px-2">Date Requested</th>
+                                        <th class="py-3 px-2">Payout Method</th>
+                                        <th class="py-3 px-2">Account / Details</th>
+                                        <th class="py-3 px-2">Amount</th>
+                                        <th class="py-3 px-2 text-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="user-savings-withdraw-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -665,54 +747,62 @@
             <div id="inv-panel-loan" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
                     <h3 class="font-bold text-lg text-slate-900 mb-1">Apply for a Loan</h3>
-                    <p class="text-xs text-slate-500 mb-4">Choose Balloon Payment (7%/mo) or Amortized Loan (5%/mo).</p>
+                    <p class="text-xs text-slate-500 mb-4">Choose Balloon Payment (7%/mo) or Amortized Loan.</p>
 
-                    <form onsubmit="submitInvestorLoan(event)" class="space-y-4">
+                    <form onsubmit="proceedToLoanForm(event, 'investor')" class="space-y-4">
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Loan Type</label>
                             <select id="inv-loan-type" onchange="toggleInvestorLoanType()" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-bold bg-white">
                                 <option value="balloon">Balloon Payment Loan (7% / mo • No Fixed Term)</option>
-                                <option value="amortized">Amortized Loan (5% / mo • Fixed Term)</option>
+                                <option value="amortized">Amortized Loan (Flexible Schedule)</option>
                             </select>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Loan Amount (₱)</label>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Principal Amount (₱)</label>
                             <input type="number" id="inv-loan-amount" min="500" step="100" required oninput="calculateInvestorLoanPreview()" placeholder="10000" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none font-bold text-slate-900">
                             <p class="text-[11px] text-slate-400 mt-1">Available limit: <span id="inv-form-limit-hint" class="font-bold text-emerald-600">₱0.00</span></p>
                         </div>
 
-                        <div id="inv-term-wrapper" class="hidden">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Payment Term</label>
-                            <select id="inv-loan-term" onchange="calculateInvestorLoanPreview()" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-medium bg-white">
-                                <option value="1">1 Month (5% Interest)</option>
-                                <option value="3" selected>3 Months (15% Total Interest)</option>
-                                <option value="6">6 Months (30% Total Interest)</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Loan Purpose</label>
-                            <input type="text" id="inv-loan-purpose" required placeholder="e.g., Business working capital" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm">
+                        <div id="inv-term-wrapper" class="hidden grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Payment Terms</label>
+                                <select id="inv-loan-term" onchange="calculateInvestorLoanPreview()" class="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-medium bg-white">
+                                    <option value="1">1 Month</option>
+                                    <option value="3" selected>3 Months</option>
+                                    <option value="6">6 Months</option>
+                                    <option value="12">12 Months</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Payment Method</label>
+                                <select id="inv-loan-frequency" onchange="calculateInvestorLoanPreview()" class="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-bold bg-white">
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="bi-weekly">Bi-Weekly</option>
+                                    <option value="monthly" selected>Monthly</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-2 text-xs">
                             <div class="flex justify-between text-slate-600">
                                 <span>Principal Amount:</span>
-                                <span id="inv-calc-principal" class="font-bold">₱0.00</span>
+                                <span id="inv-calc-principal" class="font-bold text-slate-900">₱0.00</span>
                             </div>
-                            <div class="flex justify-between text-slate-600">
-                                <span id="inv-calc-rate-label">Monthly Interest (7%):</span>
-                                <span id="inv-calc-interest" class="font-bold text-amber-600">₱0.00</span>
+                            <div id="inv-calc-balloon-row" class="flex justify-between text-slate-600">
+                                <span>Monthly Interest (7% / No Term):</span>
+                                <span id="inv-calc-interest" class="font-bold text-amber-600">₱0.00 / mo</span>
                             </div>
                             <div class="pt-2 border-t border-slate-200 flex justify-between text-sm font-extrabold text-slate-900">
-                                <span id="inv-calc-total-label">Monthly Payment Due:</span>
+                                <span id="inv-calc-total-label">Monthly Interest Due:</span>
                                 <span id="inv-calc-total" class="text-emerald-600">₱0.00</span>
                             </div>
                         </div>
 
-                        <button type="submit" class="w-full py-3.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-md transition">
-                            Submit Loan Application
+                        <button type="submit" class="w-full py-3.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                            <span>Proceed to Loan Application Form</span>
+                            <i class="fa-solid fa-file-signature"></i>
                         </button>
                     </form>
                 </div>
@@ -749,7 +839,7 @@
                         <i class="fa-solid fa-shield-halved"></i> Administrator Access
                     </span>
                     <h2 class="text-2xl font-extrabold text-slate-900">Admin Control Center</h2>
-                    <p class="text-sm text-slate-500">Create member accounts, approve Balloon & Amortized loans, deduct payments, and verify savings.</p>
+                    <p class="text-sm text-slate-500">Create member accounts, review loan forms, deduct payments, and approve savings deposits & withdrawals.</p>
                 </div>
                 <button onclick="openCreateMemberModal()" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-md shadow-emerald-600/20 transition">
                     <i class="fa-solid fa-user-plus"></i>
@@ -790,7 +880,7 @@
                     <i class="fa-solid fa-file-signature mr-1.5"></i> Loans (<span id="admin-badge-loans">0</span>)
                 </button>
                 <button id="admin-tab-savings" onclick="switchAdminTab('savings')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
-                    <i class="fa-solid fa-piggy-bank mr-1.5"></i> Savings (<span id="admin-badge-savings">0</span>)
+                    <i class="fa-solid fa-piggy-bank mr-1.5"></i> Savings Deposit & Withdraw (<span id="admin-badge-savings">0</span>)
                 </button>
                 <button id="admin-tab-deposits" onclick="switchAdminTab('deposits')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
                     <i class="fa-solid fa-money-bill-transfer mr-1.5"></i> Investments (<span id="admin-badge-deposits">0</span>)
@@ -799,11 +889,9 @@
 
             <!-- ADMIN PANEL 1: MEMBER ACCOUNTS TABLE -->
             <div id="admin-panel-members" class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-                    <div>
-                        <h3 class="font-bold text-lg text-slate-900">Member Accounts Directory</h3>
-                        <p class="text-xs text-slate-500">Create new member logins or click <strong>Edit Account</strong> to update limits, balances, and roles.</p>
-                    </div>
+                <div class="mb-4">
+                    <h3 class="font-bold text-lg text-slate-900">Member Accounts Directory</h3>
+                    <p class="text-xs text-slate-500">Create new member logins or click <strong>Edit Account</strong> to update limits, balances, and roles.</p>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -827,14 +915,14 @@
             <!-- ADMIN PANEL 2: LOAN APPROVAL & PAYMENT DEDUCTION QUEUE -->
             <div id="admin-panel-loans" class="hidden bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
                 <h3 class="font-bold text-lg text-slate-900 mb-1">Balloon & Amortized Loan Management</h3>
-                <p class="text-xs text-slate-500 mb-4">Approving sets the received date and auto-schedules the next 1-month due date. Deduct installments (hulog) on active Amortized loans or log 7% monthly interest on Balloon loans.</p>
+                <p class="text-xs text-slate-500 mb-4">Review full loan application details, approve & release funds, deduct installments (hulog), or log 7% monthly Balloon interest.</p>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                                <th class="py-3 px-3">Applicant</th>
-                                <th class="py-3 px-3">Loan Type & Terms</th>
+                                <th class="py-3 px-3">Applicant & Payout</th>
+                                <th class="py-3 px-3">Loan Type, Schedule & Form Details</th>
                                 <th class="py-3 px-3">Principal</th>
                                 <th class="py-3 px-3">Paid / Remaining</th>
                                 <th class="py-3 px-3">Next Due Date</th>
@@ -847,12 +935,12 @@
                 </div>
             </div>
 
-            <!-- ADMIN PANEL 3: SAVINGS APPROVALS & 4% P.A. MONTHLY INTEREST -->
+            <!-- ADMIN PANEL 3: SAVINGS DEPOSIT & WITHDRAW APPROVALS + 4% P.A. INTEREST -->
             <div id="admin-panel-savings" class="hidden bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                     <div>
-                        <h3 class="font-bold text-lg text-slate-900">Member Savings Deposits (Cash & Online Transfer)</h3>
-                        <p class="text-xs text-slate-500">Approve deposits to credit member savings, or credit the monthly 4% p.a. (0.333%/mo) interest to all savers.</p>
+                        <h3 class="font-bold text-lg text-slate-900">Member Savings Deposits & Withdrawals</h3>
+                        <p class="text-xs text-slate-500">Approve Cash/Online deposits to add to Savings, approve Withdrawals (1–2 working days) to deduct from Savings, or credit 4% p.a. monthly interest.</p>
                     </div>
                     <button onclick="creditMonthlySavingsInterestToAll()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-sm transition">
                         <i class="fa-solid fa-percent"></i>
@@ -865,9 +953,9 @@
                         <thead>
                             <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                                 <th class="py-3 px-3">Member</th>
+                                <th class="py-3 px-3">Type</th>
                                 <th class="py-3 px-3">Date</th>
-                                <th class="py-3 px-3">Method</th>
-                                <th class="py-3 px-3">Reference / Notes</th>
+                                <th class="py-3 px-3">Channel & Details</th>
                                 <th class="py-3 px-3">Amount</th>
                                 <th class="py-3 px-3">Status</th>
                                 <th class="py-3 px-3 text-right">Actions</th>
@@ -902,6 +990,118 @@
         </section>
 
     </main>
+
+    <!-- =====================================================================
+         MODAL: STANDARD LOAN APPLICATION FORM (Required Before Loan Submission)
+    ====================================================================== -->
+    <div id="loan-application-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 my-auto">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-file-signature"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-extrabold text-slate-900">Loan Application Form</h3>
+                        <p class="text-xs text-slate-500">Complete the standard borrower information form before submitting.</p>
+                    </div>
+                </div>
+                <button onclick="closeLoanApplicationModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Selected Loan Summary Banner -->
+            <div class="mb-5 p-4 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+                <div>
+                    <div class="text-slate-400 font-bold uppercase text-[10px]">Loan Type</div>
+                    <div id="app-summary-type" class="font-extrabold text-slate-900 mt-0.5">Amortized Loan</div>
+                </div>
+                <div>
+                    <div class="text-slate-400 font-bold uppercase text-[10px]">Principal Amount</div>
+                    <div id="app-summary-principal" class="font-extrabold text-emerald-700 mt-0.5">₱0.00</div>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                    <div id="app-summary-due-title" class="text-slate-400 font-bold uppercase text-[10px]">Payment Due</div>
+                    <div id="app-summary-due" class="font-extrabold text-slate-900 mt-0.5">₱0.00</div>
+                </div>
+            </div>
+
+            <form onsubmit="finalSubmitLoanApplication(event)" class="space-y-4">
+                <!-- 1. Purpose of Loan -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Purpose Category</label>
+                        <select id="app-purpose-category" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-medium bg-white">
+                            <option value="" disabled selected>Select purpose</option>
+                            <option value="Business / Working Capital">Business / Working Capital</option>
+                            <option value="Emergency / Medical">Emergency / Medical</option>
+                            <option value="Personal / Household">Personal / Household</option>
+                            <option value="Education / Tuition">Education / Tuition</option>
+                            <option value="Home Repair / Improvement">Home Repair / Improvement</option>
+                            <option value="Agriculture / Livelihood">Agriculture / Livelihood</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Specific Purpose Details</label>
+                        <input type="text" id="app-purpose-details" required placeholder="e.g., Additional store stocks" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm">
+                    </div>
+                </div>
+
+                <!-- 2. Disbursement / How to Receive Loan Proceeds -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Disbursement Method</label>
+                        <select id="app-disbursement-method" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-semibold bg-white">
+                            <option value="Cash Release">Cash Release (In-Person)</option>
+                            <option value="GCash">GCash</option>
+                            <option value="Maya">Maya</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Account Name & Number</label>
+                        <input type="text" id="app-disbursement-account" required placeholder="e.g., Juan Dela Cruz - 0917 123 4567" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm">
+                    </div>
+                </div>
+
+                <!-- 3. Co-Maker / Character Reference (Usual in Loan Applications) -->
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-700">
+                        <i class="fa-solid fa-user-shield text-emerald-600 mr-1"></i> Co-Maker / Emergency Reference
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 mb-1">Full Name</label>
+                            <input type="text" id="app-comaker-name" required placeholder="Maria Clara" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white outline-none text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 mb-1">Relationship</label>
+                            <input type="text" id="app-comaker-rel" required placeholder="e.g., Spouse, Sibling" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white outline-none text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 mb-1">Contact Number</label>
+                            <input type="tel" id="app-comaker-contact" required placeholder="0918 765 4321" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white outline-none text-xs">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Borrower Certification Checkbox -->
+                <label class="flex items-start gap-2.5 text-xs text-slate-600 cursor-pointer select-none">
+                    <input type="checkbox" id="app-agree-checkbox" required class="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                    <span>I hereby certify that the information above is true and correct, and I agree to pay my scheduled dues on or before the due date.</span>
+                </label>
+
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeLoanApplicationModal()" class="px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100">Cancel</button>
+                    <button type="submit" id="final-loan-submit-btn" class="px-6 py-2.5 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md">
+                        Submit Loan Application
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- =====================================================================
          MODAL 1: ADMIN CREATE MEMBER ACCOUNT
@@ -1116,7 +1316,7 @@
                         <span id="deduct-current-rem" class="font-extrabold text-slate-900">₱0.00</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-slate-500">Scheduled Monthly Hulog:</span>
+                        <span class="text-slate-500">Scheduled Installment Due:</span>
                         <span id="deduct-scheduled-amt" class="font-bold text-emerald-700">₱0.00</span>
                     </div>
                 </div>
@@ -1209,10 +1409,11 @@
             : null;
 
         let currentUser = null;
+        let pendingLoanDraft = null;
 
         /**
          * ===================================================================
-         * 1. FORMATTING, DATE & UI HELPERS
+         * 1. FORMATTING, DATE & FREQUENCY HELPERS
          * ===================================================================
          */
         function formatPHP(amount) {
@@ -1222,14 +1423,48 @@
             });
         }
 
-        function addOneMonthToDate(baseDateStr) {
+        function getTodayStr() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        function advanceDueDateByFrequency(baseDateStr, frequency = 'monthly') {
             const d = baseDateStr ? new Date(baseDateStr + 'T00:00:00') : new Date();
-            d.setMonth(d.getMonth() + 1);
+            switch ((frequency || 'monthly').toLowerCase()) {
+                case 'daily':
+                    d.setDate(d.getDate() + 1);
+                    break;
+                case 'weekly':
+                    d.setDate(d.getDate() + 7);
+                    break;
+                case 'bi-weekly':
+                    d.setDate(d.getDate() + 14);
+                    break;
+                case 'monthly':
+                default:
+                    d.setMonth(d.getMonth() + 1);
+                    break;
+            }
             return d.toISOString().split('T')[0];
         }
 
-        function getTodayStr() {
-            return new Date().toISOString().split('T')[0];
+        function getInstallmentsPerMonth(frequency) {
+            switch ((frequency || 'monthly').toLowerCase()) {
+                case 'daily': return 30;
+                case 'weekly': return 4;
+                case 'bi-weekly': return 2;
+                case 'monthly':
+                default: return 1;
+            }
+        }
+
+        function formatFrequencyLabel(frequency) {
+            switch ((frequency || 'monthly').toLowerCase()) {
+                case 'daily': return 'Daily';
+                case 'weekly': return 'Weekly';
+                case 'bi-weekly': return 'Bi-Weekly';
+                case 'monthly':
+                default: return 'Monthly';
+            }
         }
 
         function showToast(message, type = 'success') {
@@ -1271,7 +1506,7 @@
         function getStatusBadge(status) {
             switch (status) {
                 case 'approved':
-                    return '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">Approved / Active</span>';
+                    return '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">Approved</span>';
                 case 'pending':
                     return '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">Pending</span>';
                 case 'paid':
@@ -1529,7 +1764,7 @@
 
         /**
          * ===================================================================
-         * 5. BORROWER DASHBOARD (Balloon 7% vs Amortized 5% vs Savings 4% p.a.)
+         * 5. BORROWER DASHBOARD & CALCULATORS
          * ===================================================================
          */
         function switchUserDashboardTab(tab) {
@@ -1547,6 +1782,25 @@
                     btn.className = 'flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl text-sm font-extrabold text-slate-600 hover:bg-slate-100 transition';
                 }
             });
+        }
+
+        function switchSavingsSubTab(subTab) {
+            const pDep = document.getElementById('sav-panel-deposit');
+            const pWith = document.getElementById('sav-panel-withdraw');
+            const tDep = document.getElementById('sav-subtab-deposit');
+            const tWith = document.getElementById('sav-subtab-withdraw');
+
+            if (subTab === 'deposit') {
+                pDep.classList.remove('hidden');
+                pWith.classList.add('hidden');
+                tDep.className = 'px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-sky-600 text-white shadow-sm transition flex items-center gap-2';
+                tWith.className = 'px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold text-slate-600 hover:bg-white/70 transition flex items-center gap-2';
+            } else {
+                pDep.classList.add('hidden');
+                pWith.classList.remove('hidden');
+                tWith.className = 'px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-amber-600 text-white shadow-sm transition flex items-center gap-2';
+                tDep.className = 'px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold text-slate-600 hover:bg-white/70 transition flex items-center gap-2';
+            }
         }
 
         function renderUserDashboard(db) {
@@ -1583,13 +1837,20 @@
             document.getElementById('amort-limit-hint').textContent = formatPHP(availableLimit);
             document.getElementById('user-active-balance').textContent = formatPHP(remainingBalanceTotal);
 
-            // Savings & 4% p.a. Monthly Interest
+            // Savings & 4% p.a. Monthly Interest + Available to Withdraw
             const savingsBal = Number(currentUser.savings_balance || 0);
             const monthlySavingsInt = savingsBal * (0.04 / 12);
+            const mySavingsAll = db.savings.filter(s => s.user_id === currentUser.id);
+            const pendingWithdrawalsSum = mySavingsAll
+                .filter(s => s.transaction_type === 'withdraw' && s.status === 'pending')
+                .reduce((sum, s) => sum + Number(s.amount), 0);
+            const availableWithdraw = Math.max(0, savingsBal - pendingWithdrawalsSum);
+
             document.getElementById('user-savings').textContent = formatPHP(savingsBal);
             document.getElementById('user-monthly-savings-interest').textContent = formatPHP(monthlySavingsInt);
             document.getElementById('savings-tab-balance').textContent = formatPHP(savingsBal);
             document.getElementById('savings-tab-interest').textContent = '+' + formatPHP(monthlySavingsInt) + ' / mo';
+            document.getElementById('withdraw-available-hint').textContent = formatPHP(availableWithdraw);
 
             // Earliest Due Date
             if (activeApprovedLoans.length > 0) {
@@ -1600,7 +1861,7 @@
                     document.getElementById('user-due-status').textContent =
                         nextLoan.loan_type === 'balloon'
                             ? `Balloon 7% Interest Due (${formatPHP(nextLoan.monthly_payment)})`
-                            : `Amortized Hulog Due (${formatPHP(nextLoan.monthly_payment)})`;
+                            : `${formatFrequencyLabel(nextLoan.payment_frequency)} Payment Due (${formatPHP(nextLoan.monthly_payment)})`;
                 }
             } else {
                 document.getElementById('user-due-date').textContent = 'No Active Due';
@@ -1636,14 +1897,15 @@
                 amortTbody.innerHTML = amortLoans.map(loan => {
                     const paid = Number(loan.amount_paid || 0);
                     const rem = loan.remaining_balance !== null && loan.remaining_balance !== undefined ? Number(loan.remaining_balance) : Number(loan.total_due);
-                    const monthly = Number(loan.monthly_payment || (Number(loan.total_due) / (loan.term_months || 1)));
+                    const freqLabel = formatFrequencyLabel(loan.payment_frequency);
+                    const installmentDue = Number(loan.monthly_payment || 0);
                     return `
                         <tr class="hover:bg-slate-50 transition">
                             <td class="py-3 px-2">
                                 <div class="font-bold text-slate-800">${loan.purpose}</div>
-                                <div class="text-[11px] text-slate-400">${loan.term_months} mo(s) • Principal ${formatPHP(loan.amount)}</div>
+                                <div class="text-[11px] text-slate-400">${loan.term_months} mo(s) • <strong class="text-emerald-700">${freqLabel}</strong> • Principal ${formatPHP(loan.amount)}</div>
                             </td>
-                            <td class="py-3 px-2 font-semibold text-slate-700">${formatPHP(monthly)}</td>
+                            <td class="py-3 px-2 font-semibold text-slate-700">${formatPHP(installmentDue)} <span class="text-[10px] text-slate-400">/${freqLabel.toLowerCase()}</span></td>
                             <td class="py-3 px-2 font-semibold text-emerald-600">-${formatPHP(paid)}</td>
                             <td class="py-3 px-2 font-extrabold text-slate-900">${formatPHP(rem)}</td>
                             <td class="py-3 px-2 text-xs font-semibold text-amber-700">${loan.due_date || 'Upon Release'}</td>
@@ -1653,13 +1915,13 @@
                 }).join('');
             }
 
-            // Render Savings Deposits Table
-            const mySavings = db.savings.filter(s => s.user_id === currentUser.id);
-            const savTbody = document.getElementById('user-savings-tbody');
-            if (mySavings.length === 0) {
-                savTbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 text-xs">No savings deposit history yet.</td></tr>`;
+            // Render Savings Deposit History Table
+            const myDeposits = mySavingsAll.filter(s => s.transaction_type !== 'withdraw');
+            const depTbody = document.getElementById('user-savings-deposit-tbody');
+            if (myDeposits.length === 0) {
+                depTbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 text-xs">No savings deposit history yet.</td></tr>`;
             } else {
-                savTbody.innerHTML = mySavings.map(sav => `
+                depTbody.innerHTML = myDeposits.map(sav => `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="py-3 px-2 text-xs text-slate-500">${(sav.created_at || '').split('T')[0]}</td>
                         <td class="py-3 px-2">
@@ -1673,9 +1935,29 @@
                     </tr>
                 `).join('');
             }
+
+            // Render Savings Withdraw History Table
+            const myWithdrawals = mySavingsAll.filter(s => s.transaction_type === 'withdraw');
+            const withTbody = document.getElementById('user-savings-withdraw-tbody');
+            if (myWithdrawals.length === 0) {
+                withTbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 text-xs">No savings withdrawal requests yet.</td></tr>`;
+            } else {
+                withTbody.innerHTML = myWithdrawals.map(w => `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3 px-2 text-xs text-slate-500">
+                            <div>${(w.created_at || '').split('T')[0]}</div>
+                            <div class="text-[10px] text-amber-600 font-semibold">1–2 working days</div>
+                        </td>
+                        <td class="py-3 px-2 font-semibold text-xs text-slate-800">${w.payment_method}</td>
+                        <td class="py-3 px-2 text-xs text-slate-700">${w.reference_no || '—'}</td>
+                        <td class="py-3 px-2 font-bold text-rose-700">-${formatPHP(w.amount)}</td>
+                        <td class="py-3 px-2 text-right">${getStatusBadge(w.status)}</td>
+                    </tr>
+                `).join('');
+            }
         }
 
-        // Balloon Loan Preview & Submit (7% / mo, No Terms)
+        // Balloon Preview (7%/mo, No Terms)
         function calculateBalloonPreview() {
             const amount = Number(document.getElementById('balloon-amount').value || 0);
             const monthlyInt = amount * 0.07;
@@ -1683,68 +1965,48 @@
             document.getElementById('balloon-calc-interest').textContent = formatPHP(monthlyInt) + ' / mo';
         }
 
-        async function submitBalloonLoan(e) {
-            e.preventDefault();
-            const amount = Number(document.getElementById('balloon-amount').value);
-            const purpose = document.getElementById('balloon-purpose').value.trim();
-
-            const db = await fetchAllData();
-            const myLoans = db.loans.filter(l => l.user_id === currentUser.id && (l.status === 'approved' || l.status === 'pending'));
-            const usedPrincipal = myLoans.reduce((sum, l) => sum + Number(l.amount), 0);
-            const availableLimit = Math.max(0, Number(currentUser.loan_limit) - usedPrincipal);
-
-            if (amount > availableLimit) {
-                return showToast(`Amount exceeds your available credit limit (${formatPHP(availableLimit)}).`, 'error');
-            }
-
-            const monthlyInterest = amount * 0.07;
-
-            const payload = {
-                user_id: currentUser.id,
-                applicant_name: currentUser.full_name,
-                applicant_role: currentUser.role,
-                loan_type: 'balloon',
-                interest_rate: 7,
-                amount: amount,
-                term_months: 0, // No fixed terms
-                interest_amount: monthlyInterest,
-                monthly_payment: monthlyInterest,
-                total_due: amount,
-                amount_paid: 0,
-                remaining_balance: amount,
-                purpose: purpose,
-                due_date: null, // Auto-set when admin releases/approves money
-                status: 'pending'
-            };
-
-            const { error } = await supabaseClient.from('loans').insert([payload]);
-            if (error) return showToast(error.message, 'error');
-
-            e.target.reset();
-            calculateBalloonPreview();
-            showToast('Balloon Payment Loan submitted! Due date starts once funds are received.', 'success');
-            await renderActiveDashboard();
-        }
-
-        // Amortized Loan Preview & Submit (5% / mo, Deducted Hulog)
+        // Amortized Preview (Shows Principal Amount & Payment Due ONLY; supports Daily/Weekly/Bi-Weekly/Monthly)
         function calculateAmortizedPreview() {
             const amount = Number(document.getElementById('amort-amount').value || 0);
             const months = Number(document.getElementById('amort-term').value || 1);
-            const interest = amount * 0.05 * months;
-            const total = amount + interest;
-            const monthly = total / months;
+            const freq = document.getElementById('amort-frequency').value || 'monthly';
+
+            const totalPayable = amount + (amount * 0.05 * months);
+            const totalInstallments = months * getInstallmentsPerMonth(freq);
+            const paymentDue = totalInstallments > 0 ? totalPayable / totalInstallments : 0;
 
             document.getElementById('amort-calc-principal').textContent = formatPHP(amount);
-            document.getElementById('amort-calc-interest').textContent = formatPHP(interest);
-            document.getElementById('amort-calc-total').textContent = formatPHP(total);
-            document.getElementById('amort-calc-monthly').textContent = formatPHP(monthly) + ' / mo';
+            document.getElementById('amort-calc-due-label').textContent = `Payment Due (${formatFrequencyLabel(freq)}):`;
+            document.getElementById('amort-calc-due').textContent = formatPHP(paymentDue);
         }
 
-        async function submitAmortizedLoan(e) {
+        // Step 1 of Loan Submission: Validate limit & open Standard Loan Application Form Modal
+        async function proceedToLoanForm(e, sourceMode) {
             e.preventDefault();
-            const amount = Number(document.getElementById('amort-amount').value);
-            const months = Number(document.getElementById('amort-term').value);
-            const purpose = document.getElementById('amort-purpose').value.trim();
+
+            let loanType = 'amortized';
+            let amount = 0;
+            let months = 3;
+            let frequency = 'monthly';
+
+            if (sourceMode === 'balloon') {
+                loanType = 'balloon';
+                amount = Number(document.getElementById('balloon-amount').value);
+                months = 0;
+                frequency = 'monthly';
+            } else if (sourceMode === 'amortized') {
+                loanType = 'amortized';
+                amount = Number(document.getElementById('amort-amount').value);
+                months = Number(document.getElementById('amort-term').value);
+                frequency = document.getElementById('amort-frequency').value;
+            } else if (sourceMode === 'investor') {
+                loanType = document.getElementById('inv-loan-type').value;
+                amount = Number(document.getElementById('inv-loan-amount').value);
+                months = loanType === 'balloon' ? 0 : Number(document.getElementById('inv-loan-term').value);
+                frequency = loanType === 'balloon' ? 'monthly' : document.getElementById('inv-loan-frequency').value;
+            }
+
+            if (amount <= 0) return showToast('Please enter a valid principal amount.', 'error');
 
             const db = await fetchAllData();
             const myLoans = db.loans.filter(l => l.user_id === currentUser.id && (l.status === 'approved' || l.status === 'pending'));
@@ -1755,38 +2017,116 @@
                 return showToast(`Amount exceeds your available credit limit (${formatPHP(availableLimit)}).`, 'error');
             }
 
-            const interest = amount * 0.05 * months;
-            const totalDue = amount + interest;
-            const monthlyHulog = totalDue / months;
+            const interest = loanType === 'balloon' ? amount * 0.07 : amount * 0.05 * months;
+            const totalDue = loanType === 'balloon' ? amount : amount + interest;
+            const totalInstallments = loanType === 'balloon' ? 1 : months * getInstallmentsPerMonth(frequency);
+            const paymentDue = loanType === 'balloon' ? interest : totalDue / totalInstallments;
 
-            const payload = {
-                user_id: currentUser.id,
-                applicant_name: currentUser.full_name,
-                applicant_role: currentUser.role,
-                loan_type: 'amortized',
-                interest_rate: 5,
-                amount: amount,
-                term_months: months,
-                interest_amount: interest,
-                monthly_payment: monthlyHulog,
-                total_due: totalDue,
-                amount_paid: 0,
-                remaining_balance: totalDue,
-                purpose: purpose,
-                due_date: null,
-                status: 'pending'
+            pendingLoanDraft = {
+                sourceMode,
+                loanType,
+                amount,
+                months,
+                frequency,
+                interest,
+                totalDue,
+                paymentDue
             };
 
-            const { error } = await supabaseClient.from('loans').insert([payload]);
-            if (error) return showToast(error.message, 'error');
+            // Populate Summary Banner inside Standard Loan Application Modal
+            document.getElementById('app-summary-type').textContent =
+                loanType === 'balloon'
+                    ? 'Balloon Loan (7%/mo • No Term)'
+                    : `Amortized (${months} mo • ${formatFrequencyLabel(frequency)})`;
+            document.getElementById('app-summary-principal').textContent = formatPHP(amount);
+            document.getElementById('app-summary-due-title').textContent =
+                loanType === 'balloon' ? 'Monthly Interest Due' : `${formatFrequencyLabel(frequency)} Payment Due`;
+            document.getElementById('app-summary-due').textContent = formatPHP(paymentDue);
 
-            e.target.reset();
-            calculateAmortizedPreview();
-            showToast('Amortized Loan application submitted for admin review.', 'success');
-            await renderActiveDashboard();
+            // Pre-fill disbursement account name/number from profile if empty
+            if (!document.getElementById('app-disbursement-account').value && currentUser.full_name) {
+                document.getElementById('app-disbursement-account').value =
+                    `${currentUser.full_name}${currentUser.contact_number ? ' - ' + currentUser.contact_number : ''}`;
+            }
+
+            const modal = document.getElementById('loan-application-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
         }
 
-        // Savings Deposit Submit (Cash or Online Transfer)
+        function closeLoanApplicationModal() {
+            const modal = document.getElementById('loan-application-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Step 2 of Loan Submission: Submit completed Standard Loan Application Form
+        async function finalSubmitLoanApplication(e) {
+            e.preventDefault();
+            if (!pendingLoanDraft) return;
+
+            const purposeCat = document.getElementById('app-purpose-category').value;
+            const purposeDet = document.getElementById('app-purpose-details').value.trim();
+            const disbMethod = document.getElementById('app-disbursement-method').value;
+            const disbAccount = document.getElementById('app-disbursement-account').value.trim();
+            const comakerName = document.getElementById('app-comaker-name').value.trim();
+            const comakerRel = document.getElementById('app-comaker-rel').value.trim();
+            const comakerContact = document.getElementById('app-comaker-contact').value.trim();
+
+            const btn = document.getElementById('final-loan-submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+
+            try {
+                const payload = {
+                    user_id: currentUser.id,
+                    applicant_name: currentUser.full_name,
+                    applicant_role: currentUser.role,
+                    loan_type: pendingLoanDraft.loanType,
+                    interest_rate: pendingLoanDraft.loanType === 'balloon' ? 7 : 5,
+                    amount: pendingLoanDraft.amount,
+                    term_months: pendingLoanDraft.months,
+                    payment_frequency: pendingLoanDraft.frequency,
+                    interest_amount: pendingLoanDraft.interest,
+                    monthly_payment: pendingLoanDraft.paymentDue,
+                    total_due: pendingLoanDraft.totalDue,
+                    amount_paid: 0,
+                    remaining_balance: pendingLoanDraft.totalDue,
+                    purpose: `${purposeCat}: ${purposeDet}`,
+                    disbursement_method: disbMethod,
+                    disbursement_account: disbAccount,
+                    comaker_name: comakerName,
+                    comaker_relationship: comakerRel,
+                    comaker_contact: comakerContact,
+                    due_date: null,
+                    status: 'pending'
+                };
+
+                const { error } = await supabaseClient.from('loans').insert([payload]);
+                if (error) return showToast(error.message, 'error');
+
+                e.target.reset();
+                closeLoanApplicationModal();
+                pendingLoanDraft = null;
+
+                // Reset calculator inputs
+                ['balloon-amount', 'amort-amount', 'inv-loan-amount'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+                calculateBalloonPreview();
+                calculateAmortizedPreview();
+                calculateInvestorLoanPreview();
+
+                showToast('Loan application submitted for Administrator review!', 'success');
+                await renderActiveDashboard();
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Submit Loan Application';
+            }
+        }
+
+        // Savings Deposit & Withdraw Handlers
         function toggleSavingsRefField() {
             const method = document.getElementById('savings-method').value;
             const label = document.getElementById('savings-ref-label');
@@ -1808,23 +2148,55 @@
             const amount = Number(document.getElementById('savings-amount').value);
             const ref = document.getElementById('savings-ref').value.trim();
 
-            if (amount <= 0) return showToast('Enter a valid savings amount.', 'error');
+            if (amount <= 0) return showToast('Enter a valid savings deposit amount.', 'error');
 
-            const payload = {
+            const { error } = await supabaseClient.from('savings_deposits').insert([{
                 user_id: currentUser.id,
                 member_name: currentUser.full_name,
+                transaction_type: 'deposit',
                 amount: amount,
                 payment_method: method,
                 reference_no: ref || (method === 'Cash' ? 'Cash Deposit' : ''),
                 status: 'pending'
-            };
-
-            const { error } = await supabaseClient.from('savings_deposits').insert([payload]);
+            }]);
             if (error) return showToast(error.message, 'error');
 
             e.target.reset();
             toggleSavingsRefField();
             showToast('Savings deposit submitted! Waiting for Admin approval.', 'success');
+            await renderActiveDashboard();
+        }
+
+        async function submitSavingsWithdrawal(e) {
+            e.preventDefault();
+            const amount = Number(document.getElementById('withdraw-amount').value);
+            const method = document.getElementById('withdraw-method').value;
+            const account = document.getElementById('withdraw-account').value.trim();
+
+            const db = await fetchAllData();
+            const savingsBal = Number(currentUser.savings_balance || 0);
+            const pendingWithdrawalsSum = db.savings
+                .filter(s => s.user_id === currentUser.id && s.transaction_type === 'withdraw' && s.status === 'pending')
+                .reduce((sum, s) => sum + Number(s.amount), 0);
+            const availableWithdraw = Math.max(0, savingsBal - pendingWithdrawalsSum);
+
+            if (amount <= 0 || amount > availableWithdraw) {
+                return showToast(`Amount exceeds available withdrawable savings (${formatPHP(availableWithdraw)}).`, 'error');
+            }
+
+            const { error } = await supabaseClient.from('savings_deposits').insert([{
+                user_id: currentUser.id,
+                member_name: currentUser.full_name,
+                transaction_type: 'withdraw',
+                amount: amount,
+                payment_method: method,
+                reference_no: account,
+                status: 'pending'
+            }]);
+            if (error) return showToast(error.message, 'error');
+
+            e.target.reset();
+            showToast('Withdrawal request submitted! Processing takes 1–2 working days until Admin approval.', 'success');
             await renderActiveDashboard();
         }
 
@@ -1855,10 +2227,15 @@
         function toggleInvestorLoanType() {
             const type = document.getElementById('inv-loan-type').value;
             const termWrapper = document.getElementById('inv-term-wrapper');
+            const balloonRow = document.getElementById('inv-calc-balloon-row');
             if (type === 'balloon') {
                 termWrapper.classList.add('hidden');
+                termWrapper.classList.remove('grid');
+                balloonRow.classList.remove('hidden');
             } else {
                 termWrapper.classList.remove('hidden');
+                termWrapper.classList.add('grid');
+                balloonRow.classList.add('hidden');
             }
             calculateInvestorLoanPreview();
         }
@@ -1870,18 +2247,16 @@
 
             if (type === 'balloon') {
                 const monthlyInt = amount * 0.07;
-                document.getElementById('inv-calc-rate-label').textContent = 'Monthly Interest (7% / No Term):';
                 document.getElementById('inv-calc-interest').textContent = formatPHP(monthlyInt) + ' / mo';
                 document.getElementById('inv-calc-total-label').textContent = 'Monthly Interest Due:';
                 document.getElementById('inv-calc-total').textContent = formatPHP(monthlyInt) + ' / mo';
             } else {
                 const months = Number(document.getElementById('inv-loan-term').value || 1);
-                const interest = amount * 0.05 * months;
-                const total = amount + interest;
-                document.getElementById('inv-calc-rate-label').textContent = `Total Interest (5% × ${months} mo):`;
-                document.getElementById('inv-calc-interest').textContent = formatPHP(interest);
-                document.getElementById('inv-calc-total-label').textContent = 'Monthly Hulog:';
-                document.getElementById('inv-calc-total').textContent = formatPHP(total / months) + ' / mo';
+                const freq = document.getElementById('inv-loan-frequency').value || 'monthly';
+                const total = amount + (amount * 0.05 * months);
+                const paymentDue = total / (months * getInstallmentsPerMonth(freq));
+                document.getElementById('inv-calc-total-label').textContent = `Payment Due (${formatFrequencyLabel(freq)}):`;
+                document.getElementById('inv-calc-total').textContent = formatPHP(paymentDue);
             }
         }
 
@@ -1962,54 +2337,9 @@
             await renderActiveDashboard();
         }
 
-        async function submitInvestorLoan(e) {
-            e.preventDefault();
-            const type = document.getElementById('inv-loan-type').value;
-            const amount = Number(document.getElementById('inv-loan-amount').value);
-            const months = type === 'balloon' ? 0 : Number(document.getElementById('inv-loan-term').value);
-            const purpose = document.getElementById('inv-loan-purpose').value.trim();
-
-            const db = await fetchAllData();
-            const myLoans = db.loans.filter(l => l.user_id === currentUser.id && (l.status === 'approved' || l.status === 'pending'));
-            const usedPrincipal = myLoans.reduce((sum, l) => sum + Number(l.amount), 0);
-            const availableLimit = Math.max(0, Number(currentUser.loan_limit) - usedPrincipal);
-
-            if (amount > availableLimit) {
-                return showToast(`Amount exceeds available credit limit (${formatPHP(availableLimit)}).`, 'error');
-            }
-
-            const interest = type === 'balloon' ? amount * 0.07 : amount * 0.05 * months;
-            const totalDue = type === 'balloon' ? amount : amount + interest;
-            const monthlyPay = type === 'balloon' ? interest : totalDue / months;
-
-            const { error } = await supabaseClient.from('loans').insert([{
-                user_id: currentUser.id,
-                applicant_name: currentUser.full_name,
-                applicant_role: currentUser.role,
-                loan_type: type,
-                interest_rate: type === 'balloon' ? 7 : 5,
-                amount: amount,
-                term_months: months,
-                interest_amount: interest,
-                monthly_payment: monthlyPay,
-                total_due: totalDue,
-                amount_paid: 0,
-                remaining_balance: totalDue,
-                purpose: purpose,
-                due_date: null,
-                status: 'pending'
-            }]);
-            if (error) return showToast(error.message, 'error');
-
-            e.target.reset();
-            calculateInvestorLoanPreview();
-            showToast('Loan application submitted for review.', 'success');
-            await renderActiveDashboard();
-        }
-
         /**
          * ===================================================================
-         * 7. ADMIN CONTROL CENTER (Create Member, Loans, Savings, Investments)
+         * 7. ADMIN CONTROL CENTER
          * ===================================================================
          */
         function switchAdminTab(tab) {
@@ -2057,7 +2387,6 @@
             btn.textContent = 'Creating...';
 
             try {
-                // Use non-persisting client so Admin stays logged in
                 const { data, error } = await adminCreateClient.auth.signUp({ email, password });
                 if (error) {
                     showToast(error.message, 'error');
@@ -2161,16 +2490,17 @@
                 `;
             }).join('');
 
-            // 2. Loans Management Table (Balloon 7% vs Amortized 5%)
+            // 2. Loans Management Table (With full Loan Application Form details)
             const loansTbody = document.getElementById('admin-loans-tbody');
             if (db.loans.length === 0) {
                 loansTbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 text-xs">No loan records found.</td></tr>`;
             } else {
                 loansTbody.innerHTML = db.loans.map(loan => {
                     const isBalloon = loan.loan_type === 'balloon';
+                    const freqLabel = formatFrequencyLabel(loan.payment_frequency);
                     const typeBadge = isBalloon
                         ? '<span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-amber-100 text-amber-800">Balloon 7%/mo • No Term</span>'
-                        : `<span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800">Amortized 5%/mo • ${loan.term_months} mo</span>`;
+                        : `<span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800">Amortized • ${loan.term_months} mo (${freqLabel})</span>`;
 
                     const paid = Number(loan.amount_paid || 0);
                     const rem = loan.remaining_balance !== null && loan.remaining_balance !== undefined ? Number(loan.remaining_balance) : Number(loan.total_due);
@@ -2184,7 +2514,7 @@
                     } else if (loan.status === 'approved') {
                         if (isBalloon) {
                             actionButtons = `
-                                <button onclick="logBalloonMonthlyInterest('${loan.id}')" class="px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold" title="Record monthly 7% interest and advance due date by 1 month">+1 Mo Int. Paid</button>
+                                <button onclick="logBalloonMonthlyInterest('${loan.id}')" class="px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold">+1 Mo Int. Paid</button>
                                 <button onclick="markLoanFullyPaid('${loan.id}')" class="px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold">Settle Principal</button>
                             `;
                         } else {
@@ -2199,11 +2529,13 @@
                         <tr class="hover:bg-slate-50 transition">
                             <td class="py-3.5 px-3">
                                 <div class="font-bold text-slate-900">${loan.applicant_name}</div>
-                                <div class="text-[11px] text-slate-400">${loan.received_date ? 'Received: ' + loan.received_date : 'Applied: ' + (loan.created_at || '').split('T')[0]}</div>
+                                ${loan.disbursement_method ? `<div class="text-[11px] font-semibold text-sky-700 mt-0.5"><i class="fa-solid fa-money-check-dollar mr-1"></i>${loan.disbursement_method}: ${loan.disbursement_account || ''}</div>` : ''}
+                                <div class="text-[10px] text-slate-400 mt-0.5">${loan.received_date ? 'Received: ' + loan.received_date : 'Applied: ' + (loan.created_at || '').split('T')[0]}</div>
                             </td>
                             <td class="py-3.5 px-3">
                                 ${typeBadge}
-                                <div class="font-medium text-slate-800 mt-1">${loan.purpose}</div>
+                                <div class="font-semibold text-slate-800 text-xs mt-1">${loan.purpose}</div>
+                                ${loan.comaker_name ? `<div class="text-[11px] text-slate-500 mt-0.5"><i class="fa-solid fa-user-shield text-slate-400 mr-1"></i>Co-Maker: ${loan.comaker_name} (${loan.comaker_relationship || ''}) • ${loan.comaker_contact || ''}</div>` : ''}
                             </td>
                             <td class="py-3.5 px-3 font-bold text-slate-900">${formatPHP(loan.amount)}</td>
                             <td class="py-3.5 px-3 text-xs">
@@ -2218,31 +2550,39 @@
                 }).join('');
             }
 
-            // 3. Savings Deposits Table
+            // 3. Savings Deposits & Withdrawals Table
             const savingsTbody = document.getElementById('admin-savings-tbody');
             if (db.savings.length === 0) {
-                savingsTbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 text-xs">No member savings deposit requests yet.</td></tr>`;
+                savingsTbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 text-xs">No savings deposit or withdrawal requests yet.</td></tr>`;
             } else {
-                savingsTbody.innerHTML = db.savings.map(sav => `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="py-3.5 px-3 font-bold text-slate-900">${sav.member_name}</td>
-                        <td class="py-3.5 px-3 text-xs text-slate-500">${(sav.created_at || '').split('T')[0]}</td>
-                        <td class="py-3.5 px-3">
-                            <span class="px-2 py-0.5 rounded text-[11px] font-bold ${sav.payment_method === 'Cash' ? 'bg-emerald-50 text-emerald-700' : 'bg-sky-50 text-sky-700'}">
-                                ${sav.payment_method}
-                            </span>
-                        </td>
-                        <td class="py-3.5 px-3 text-xs text-slate-700">${sav.reference_no || '—'}</td>
-                        <td class="py-3.5 px-3 font-bold text-sky-700">${formatPHP(sav.amount)}</td>
-                        <td class="py-3.5 px-3">${getStatusBadge(sav.status)}</td>
-                        <td class="py-3.5 px-3 text-right space-x-1">
-                            ${sav.status === 'pending' ? `
-                                <button onclick="approveSavingsDeposit('${sav.id}', 'approved')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">Approve & Credit</button>
-                                <button onclick="approveSavingsDeposit('${sav.id}', 'rejected')" class="px-2.5 py-1.5 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold">Reject</button>
-                            ` : `<span class="text-xs text-slate-400">Processed</span>`}
-                        </td>
-                    </tr>
-                `).join('');
+                savingsTbody.innerHTML = db.savings.map(sav => {
+                    const isWithdraw = sav.transaction_type === 'withdraw';
+                    const txBadge = isWithdraw
+                        ? '<span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-amber-100 text-amber-800">Withdraw (1–2 Days)</span>'
+                        : '<span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-sky-100 text-sky-800">Deposit</span>';
+
+                    return `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="py-3.5 px-3 font-bold text-slate-900">${sav.member_name}</td>
+                            <td class="py-3.5 px-3">${txBadge}</td>
+                            <td class="py-3.5 px-3 text-xs text-slate-500">${(sav.created_at || '').split('T')[0]}</td>
+                            <td class="py-3.5 px-3 text-xs">
+                                <div class="font-bold text-slate-800">${sav.payment_method}</div>
+                                <div class="text-slate-500">${sav.reference_no || '—'}</div>
+                            </td>
+                            <td class="py-3.5 px-3 font-bold ${isWithdraw ? 'text-rose-700' : 'text-sky-700'}">${isWithdraw ? '-' : '+'}${formatPHP(sav.amount)}</td>
+                            <td class="py-3.5 px-3">${getStatusBadge(sav.status)}</td>
+                            <td class="py-3.5 px-3 text-right space-x-1 whitespace-nowrap">
+                                ${sav.status === 'pending' ? `
+                                    <button onclick="processSavingsTransaction('${sav.id}', 'approved')" class="px-2.5 py-1.5 rounded-lg ${isWithdraw ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white text-xs font-bold">
+                                        ${isWithdraw ? 'Approve & Deduct' : 'Approve & Credit'}
+                                    </button>
+                                    <button onclick="processSavingsTransaction('${sav.id}', 'rejected')" class="px-2.5 py-1.5 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold">Reject</button>
+                                ` : `<span class="text-xs text-slate-400">Processed</span>`}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
             }
 
             // 4. Investor Deposits Table
@@ -2268,13 +2608,14 @@
             }
         }
 
-        // Admin Loan Actions (Auto due date upon release, Balloon interest log, Amortized deduction)
+        // Admin Loan Actions
         async function approveAndReleaseLoan(loanId) {
             const { data: loan, error: fetchErr } = await supabaseClient.from('loans').select('*').eq('id', loanId).single();
             if (fetchErr || !loan) return showToast('Loan record not found.', 'error');
 
             const receivedDate = getTodayStr();
-            const nextDueDate = addOneMonthToDate(receivedDate);
+            const freq = loan.loan_type === 'balloon' ? 'monthly' : (loan.payment_frequency || 'monthly');
+            const nextDueDate = advanceDueDateByFrequency(receivedDate, freq);
 
             const { error } = await supabaseClient.from('loans').update({
                 status: 'approved',
@@ -2286,7 +2627,7 @@
 
             const label = loan.loan_type === 'balloon'
                 ? `Balloon Loan (${formatPHP(loan.amount)}) approved & released! Your first 7% monthly interest (${formatPHP(loan.monthly_payment)}) is due on ${nextDueDate}.`
-                : `Amortized Loan (${formatPHP(loan.amount)}) approved & released! Your first monthly installment (${formatPHP(loan.monthly_payment)}) is due on ${nextDueDate}.`;
+                : `Amortized Loan (${formatPHP(loan.amount)}) approved & released! Your first ${formatFrequencyLabel(freq).toLowerCase()} payment (${formatPHP(loan.monthly_payment)}) is due on ${nextDueDate}.`;
 
             await createNotification(loan.user_id, 'Loan Approved & Released', label, 'loan');
             showToast(`Loan approved! Next due date auto-set to ${nextDueDate}.`, 'success');
@@ -2311,7 +2652,7 @@
 
             const monthlyInt = Number(loan.monthly_payment || loan.amount * 0.07);
             const newPaid = Number(loan.amount_paid || 0) + monthlyInt;
-            const nextDue = addOneMonthToDate(loan.due_date || getTodayStr());
+            const nextDue = advanceDueDateByFrequency(loan.due_date || getTodayStr(), 'monthly');
 
             const { error } = await supabaseClient.from('loans').update({
                 amount_paid: newPaid,
@@ -2338,7 +2679,7 @@
             const scheduled = Number(loan.monthly_payment || (Number(loan.total_due) / (loan.term_months || 1)));
 
             document.getElementById('deduct-loan-id').value = loan.id;
-            document.getElementById('deduct-modal-subtitle').textContent = `${loan.applicant_name} — ${loan.purpose}`;
+            document.getElementById('deduct-modal-subtitle').textContent = `${loan.applicant_name} — ${formatFrequencyLabel(loan.payment_frequency)}`;
             document.getElementById('deduct-current-rem').textContent = formatPHP(rem);
             document.getElementById('deduct-scheduled-amt').textContent = formatPHP(scheduled);
             document.getElementById('deduct-input-amount').value = Math.min(rem, scheduled).toFixed(2);
@@ -2368,7 +2709,7 @@
             const newPaid = currentPaid + deductAmt;
             const newRem = Math.max(0, currentRem - deductAmt);
             const isFullyPaid = newRem <= 0.01;
-            const nextDue = isFullyPaid ? loan.due_date : addOneMonthToDate(loan.due_date || getTodayStr());
+            const nextDue = isFullyPaid ? loan.due_date : advanceDueDateByFrequency(loan.due_date || getTodayStr(), loan.payment_frequency || 'monthly');
 
             const { error } = await supabaseClient.from('loans').update({
                 amount_paid: newPaid,
@@ -2410,35 +2751,58 @@
             await renderActiveDashboard();
         }
 
-        // Admin Savings Actions (Approve Cash/Online Transfer & Credit 4% p.a. Monthly Interest)
-        async function approveSavingsDeposit(savingsId, newStatus) {
+        // Admin Savings Deposit & Withdrawal Processor
+        async function processSavingsTransaction(savingsId, newStatus) {
             const { data: sav, error: fetchErr } = await supabaseClient.from('savings_deposits').select('*').eq('id', savingsId).single();
             if (fetchErr || !sav) return showToast('Savings record not found.', 'error');
 
-            const { error: updErr } = await supabaseClient.from('savings_deposits').update({ status: newStatus }).eq('id', savingsId);
-            if (updErr) return showToast(updErr.message, 'error');
+            const isWithdraw = sav.transaction_type === 'withdraw';
 
             if (newStatus === 'approved') {
                 const { data: prof } = await supabaseClient.from('profiles').select('savings_balance').eq('id', sav.user_id).single();
-                const updatedSavings = Number(prof?.savings_balance || 0) + Number(sav.amount);
+                const currentBal = Number(prof?.savings_balance || 0);
+
+                if (isWithdraw && Number(sav.amount) > currentBal) {
+                    return showToast(`Insufficient savings balance (${formatPHP(currentBal)}) to approve withdrawal.`, 'error');
+                }
+
+                const updatedSavings = isWithdraw
+                    ? Math.max(0, currentBal - Number(sav.amount))
+                    : currentBal + Number(sav.amount);
+
+                const { error: updErr } = await supabaseClient.from('savings_deposits').update({ status: 'approved' }).eq('id', savingsId);
+                if (updErr) return showToast(updErr.message, 'error');
+
                 await supabaseClient.from('profiles').update({ savings_balance: updatedSavings }).eq('id', sav.user_id);
 
                 await createNotification(
                     sav.user_id,
-                    'Savings Deposit Approved',
-                    `Your ${sav.payment_method} deposit of ${formatPHP(sav.amount)} has been approved and added to your Savings Balance.`,
+                    isWithdraw ? 'Savings Withdrawal Approved' : 'Savings Deposit Approved',
+                    isWithdraw
+                        ? `Your savings withdrawal of ${formatPHP(sav.amount)} via ${sav.payment_method} has been approved and deducted from your Savings Balance.`
+                        : `Your ${sav.payment_method} deposit of ${formatPHP(sav.amount)} has been approved and added to your Savings Balance.`,
                     'savings'
                 );
             } else {
+                const { error: updErr } = await supabaseClient.from('savings_deposits').update({ status: 'rejected' }).eq('id', savingsId);
+                if (updErr) return showToast(updErr.message, 'error');
+
                 await createNotification(
                     sav.user_id,
-                    'Savings Deposit Rejected',
-                    `Your ${sav.payment_method} deposit request of ${formatPHP(sav.amount)} was rejected.`,
+                    isWithdraw ? 'Savings Withdrawal Rejected' : 'Savings Deposit Rejected',
+                    isWithdraw
+                        ? `Your savings withdrawal request of ${formatPHP(sav.amount)} was rejected.`
+                        : `Your ${sav.payment_method} deposit request of ${formatPHP(sav.amount)} was rejected.`,
                     'savings'
                 );
             }
 
-            showToast(newStatus === 'approved' ? 'Savings deposit approved & credited!' : 'Savings deposit rejected.', 'success');
+            showToast(
+                newStatus === 'approved'
+                    ? (isWithdraw ? 'Withdrawal approved & deducted from savings!' : 'Deposit approved & credited to savings!')
+                    : 'Request rejected.',
+                'success'
+            );
             await renderActiveDashboard();
         }
 
@@ -2456,10 +2820,10 @@
                 const newBal = currentBal + monthlyInterest;
                 await supabaseClient.from('profiles').update({ savings_balance: newBal }).eq('id', member.id);
 
-                // Log in savings_deposits history as an approved interest credit
                 await supabaseClient.from('savings_deposits').insert([{
                     user_id: member.id,
                     member_name: member.full_name,
+                    transaction_type: 'deposit',
                     amount: monthlyInterest,
                     payment_method: 'Monthly Interest (4% p.a.)',
                     reference_no: `4% p.a. Monthly Yield (${getTodayStr()})`,
