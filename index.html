@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BayanFund & Investment Portal</title>
+    <title>BayanFund — Lending & Investment Portal</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Chart.js for Business Cashflow & Growth Monitoring -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Supabase JS Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
@@ -69,7 +71,7 @@
                     </div>
                 </div>
 
-                <!-- Authenticated User Controls: Notification Bell, Change Password, Sign Out -->
+                <!-- Authenticated User Controls -->
                 <div id="nav-user-controls" class="hidden items-center gap-2 sm:gap-3">
                     <!-- Notification Bell -->
                     <div class="relative" id="notif-wrapper">
@@ -124,7 +126,6 @@
         ================================================================== -->
         <section id="auth-screen" class="max-w-md w-full mx-auto">
             <div class="bg-white rounded-3xl p-7 sm:p-9 border border-slate-200 shadow-lg shadow-slate-200/50">
-                <!-- Header -->
                 <div class="text-center mb-7">
                     <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3 text-xl border border-emerald-100">
                         <i class="fa-solid fa-shield-halved"></i>
@@ -133,10 +134,8 @@
                     <p class="text-xs sm:text-sm text-slate-500 mt-1">Enter the email and password provided by your administrator.</p>
                 </div>
 
-                <!-- Inline Auth Alert -->
                 <div id="auth-inline-alert" class="hidden mb-5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium leading-relaxed"></div>
 
-                <!-- Sign In Form -->
                 <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
                     <div>
                         <label for="login-email" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Email Address</label>
@@ -171,12 +170,8 @@
 
         <!-- =================================================================
              2. BORROWER (USER) DASHBOARD
-                - Balloon Payment Loan (7% / mo, No Terms, Auto Due Date)
-                - Amortized Loan (Daily / Weekly / Bi-Weekly / Monthly, Principal & Payment Due only)
-                - Savings Wallet (Deposit Dashboard + Withdraw Dashboard w/ 1-2 working days)
         ================================================================== -->
         <section id="user-dashboard" class="hidden space-y-6 w-full self-start">
-            <!-- Welcome Header -->
             <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-800 mb-2">
@@ -198,7 +193,6 @@
 
             <!-- Key Financial Metrics Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Available Loan Limit -->
                 <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-3xl p-5 shadow-md">
                     <div class="flex items-center justify-between mb-3">
                         <span class="text-xs font-bold uppercase tracking-wider text-emerald-100">Available Loan Limit</span>
@@ -210,7 +204,6 @@
                     <div class="text-xs text-emerald-100 mt-1">Max Limit: <span id="user-max-limit" class="font-semibold">₱0.00</span></div>
                 </div>
 
-                <!-- Active Remaining Loan Balance -->
                 <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
                     <div class="flex items-center justify-between mb-3">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Remaining Loan Balance</span>
@@ -222,7 +215,6 @@
                     <div class="text-xs text-slate-500 mt-1">After deducted payments (hulog)</div>
                 </div>
 
-                <!-- Next Due Date -->
                 <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
                     <div class="flex items-center justify-between mb-3">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Next Payment / Interest Due</span>
@@ -234,7 +226,6 @@
                     <div id="user-due-status" class="text-xs text-slate-500 mt-1">Auto-scheduled upon fund release</div>
                 </div>
 
-                <!-- Savings Balance (4% p.a.) -->
                 <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
                     <div class="flex items-center justify-between mb-3">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Savings Balance</span>
@@ -247,9 +238,7 @@
                 </div>
             </div>
 
-            <!-- =============================================================
-                 DASHBOARD MODE SELECTOR TABS (Balloon vs Amortized vs Savings)
-            ============================================================== -->
+            <!-- Borrower Dashboard Mode Selector Tabs -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white p-2.5 rounded-3xl border border-slate-200 shadow-sm">
                 <button id="user-tab-balloon" onclick="switchUserDashboardTab('balloon')" class="flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl text-sm font-extrabold bg-amber-600 text-white shadow-md transition">
                     <i class="fa-solid fa-fire-flame-curved"></i>
@@ -276,11 +265,8 @@
                 </button>
             </div>
 
-            <!-- =============================================================
-                 TAB 1: BALLOON PAYMENT LOAN DASHBOARD (7% / mo, No Terms)
-            ============================================================== -->
+            <!-- TAB 1: BALLOON PAYMENT LOAN -->
             <div id="user-panel-balloon" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Balloon Loan Calculator Card (Opens Standard Loan Application Form) -->
                 <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-amber-200 shadow-sm">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg">
@@ -308,7 +294,6 @@
                             <p class="text-[11px] text-slate-400 mt-1">Available limit: <span id="balloon-limit-hint" class="font-bold text-emerald-600">₱0.00</span></p>
                         </div>
 
-                        <!-- Balloon Auto-Computation Box -->
                         <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-2 text-xs">
                             <div class="flex justify-between text-slate-600">
                                 <span>Principal (Balloon Lump Sum):</span>
@@ -331,7 +316,6 @@
                     </form>
                 </div>
 
-                <!-- Balloon Loan Ledger -->
                 <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col">
                     <div class="mb-4">
                         <h3 class="font-bold text-lg text-slate-900">My Balloon Payment Loans</h3>
@@ -355,14 +339,8 @@
                 </div>
             </div>
 
-            <!-- =============================================================
-                 TAB 2: AMORTIZED LOAN DASHBOARD
-                        - Principal Amount & Payment Due ONLY in Calculator
-                        - Terms + Payment Method (Daily, Weekly, Bi-Weekly, Monthly)
-                        - Proceeds to Standard Loan Application Form Modal
-            ============================================================== -->
+            <!-- TAB 2: AMORTIZED LOAN -->
             <div id="user-panel-amortized" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Amortized Loan Calculator Card -->
                 <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-emerald-200 shadow-sm">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
@@ -404,7 +382,6 @@
                             </div>
                         </div>
 
-                        <!-- Clean Amortized Calculator Box (Principal Amount & Payment Due ONLY) -->
                         <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-2.5 text-xs">
                             <div class="flex justify-between items-center text-slate-600">
                                 <span class="font-semibold">Principal Amount:</span>
@@ -423,7 +400,6 @@
                     </form>
                 </div>
 
-                <!-- Amortized Loan Ledger -->
                 <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col">
                     <div class="mb-4">
                         <h3 class="font-bold text-lg text-slate-900">My Amortized Loans</h3>
@@ -448,11 +424,8 @@
                 </div>
             </div>
 
-            <!-- =============================================================
-                 TAB 3: SAVINGS WALLET (2 DASHBOARDS: DEPOSIT & WITHDRAW)
-            ============================================================== -->
+            <!-- TAB 3: SAVINGS WALLET (2 DASHBOARDS: DEPOSIT & WITHDRAW) -->
             <div id="user-panel-savings" class="hidden space-y-6">
-                <!-- Savings Wallet Top Banner + 2 Sub-Dashboard Switcher -->
                 <div class="bg-white rounded-3xl p-5 sm:p-6 border border-sky-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <div class="text-xs font-bold uppercase tracking-wider text-sky-600">Verified Savings Wallet • 4.00% p.a.</div>
@@ -464,7 +437,6 @@
                         </div>
                     </div>
 
-                    <!-- 2 Savings Sub-Dashboards Switcher: DEPOSIT vs WITHDRAW -->
                     <div class="flex gap-2 bg-slate-100 p-1.5 rounded-2xl">
                         <button id="sav-subtab-deposit" onclick="switchSavingsSubTab('deposit')" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-sky-600 text-white shadow-sm transition flex items-center gap-2">
                             <i class="fa-solid fa-circle-arrow-down"></i>
@@ -477,7 +449,7 @@
                     </div>
                 </div>
 
-                <!-- SUB-DASHBOARD A: SAVINGS DEPOSIT (Cash / Online Transfer) -->
+                <!-- SUB-DASHBOARD A: SAVINGS DEPOSIT -->
                 <div id="sav-panel-deposit" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-sky-200 shadow-sm">
                         <div class="flex items-center gap-3 mb-4">
@@ -522,8 +494,8 @@
 
                     <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col">
                         <div class="mb-4">
-                            <h3 class="font-bold text-lg text-slate-900">Deposit & Monthly Interest History</h3>
-                            <p class="text-xs text-slate-500">Track your Cash, Online Transfer deposits, and 4% p.a. monthly interest credits.</p>
+                            <h3 class="font-bold text-lg text-slate-900">Deposit & Interest Credit History</h3>
+                            <p class="text-xs text-slate-500">Track your Cash, Online Transfer deposits, and monthly interest credits.</p>
                         </div>
 
                         <div class="overflow-x-auto flex-grow">
@@ -543,7 +515,7 @@
                     </div>
                 </div>
 
-                <!-- SUB-DASHBOARD B: SAVINGS WITHDRAW (1-2 Working Days Processing until Admin Approved) -->
+                <!-- SUB-DASHBOARD B: SAVINGS WITHDRAW -->
                 <div id="sav-panel-withdraw" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-amber-200 shadow-sm">
                         <div class="flex items-center gap-3 mb-4">
@@ -567,7 +539,7 @@
                             </div>
                         </div>
 
-                        <form onsubmit="submitSavingsWithdrawal(event)" class="space-y-4">
+                        <form onsubmit="submitSavingsWithdrawal(event, 'user')" class="space-y-4">
                             <div>
                                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Withdrawal Amount (₱)</label>
                                 <input type="number" id="withdraw-amount" min="100" step="50" required placeholder="1000" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-amber-500 outline-none font-bold text-slate-900">
@@ -620,17 +592,20 @@
         </section>
 
         <!-- =================================================================
-             3. INVESTOR DASHBOARD (Portfolio Growth + Dual Loan Access)
+             3. INVESTOR DASHBOARD
+                - Invested Capital FROZEN for 1 Year from Effective Date
+                - Auto 1% Monthly Return credited directly to Savings Wallet
+                - Investor can ONLY withdraw the 1% interest inside Savings Wallet
         ================================================================== -->
         <section id="investor-dashboard" class="hidden space-y-6 w-full self-start">
             <!-- Investor Header -->
             <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 text-white rounded-3xl p-6 sm:p-8 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-2">
-                        <i class="fa-solid fa-gem"></i> Verified Investor
+                        <i class="fa-solid fa-gem"></i> Verified Investor • 1% Monthly Auto-Yield
                     </span>
                     <h2 class="text-2xl sm:text-3xl font-extrabold">Welcome, <span id="inv-welcome-name">Investor</span></h2>
-                    <p class="text-sm text-slate-300 mt-1">Monitor your invested capital growth, accrued profits, and personal credit facility.</p>
+                    <p class="text-sm text-slate-300 mt-1">Principal is locked for 1 year. Your 1% monthly interest automatically enters your Savings Wallet.</p>
                 </div>
                 <div class="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-3 rounded-2xl border border-white/10">
                     <div class="text-right">
@@ -643,45 +618,49 @@
                 </div>
             </div>
 
-            <!-- Investor Portfolio & Loan Metrics -->
+            <!-- Investor Portfolio & Savings Metrics -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Frozen Invested Capital -->
                 <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
                     <div class="flex items-center justify-between mb-3">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Invested Capital</span>
-                        <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                            <i class="fa-solid fa-sack-dollar"></i>
+                        <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center" title="Locked for 1 Year">
+                            <i class="fa-solid fa-lock"></i>
                         </div>
                     </div>
                     <div id="inv-capital" class="text-2xl sm:text-3xl font-extrabold text-slate-900">₱0.00</div>
-                    <div class="text-xs text-emerald-600 font-semibold mt-1">Active Lending Pool Share</div>
+                    <div class="text-xs text-amber-700 font-semibold mt-1"><i class="fa-solid fa-shield-halved mr-1"></i>Frozen for 1 Year from Effective Date</div>
                 </div>
 
+                <!-- Auto 1% Monthly Yield -> Savings Wallet -->
                 <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-3xl p-5 shadow-md">
                     <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-100">Accrued Earnings (Profit)</span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-100">Savings Wallet (Withdrawable)</span>
                         <div class="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
+                            <i class="fa-solid fa-piggy-bank"></i>
+                        </div>
+                    </div>
+                    <div id="inv-savings-wallet" class="text-2xl sm:text-3xl font-extrabold">₱0.00</div>
+                    <div class="text-xs text-emerald-100 mt-1">Auto +1%/mo (<span id="inv-monthly-rate-amt" class="font-bold">₱0.00</span>/mo)</div>
+                </div>
+
+                <!-- Cumulative Accrued Interest -->
+                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Accrued Interest</span>
+                        <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
                             <i class="fa-solid fa-arrow-trend-up"></i>
                         </div>
                     </div>
-                    <div id="inv-earnings" class="text-2xl sm:text-3xl font-extrabold">₱0.00</div>
-                    <div class="text-xs text-emerald-100 mt-1">Cumulative dividend yield</div>
+                    <div id="inv-earnings" class="text-2xl sm:text-3xl font-extrabold text-indigo-600">₱0.00</div>
+                    <div class="text-xs text-slate-500 mt-1">Auto-credited every month</div>
                 </div>
 
-                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Portfolio Value</span>
-                        <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                            <i class="fa-solid fa-chart-pie"></i>
-                        </div>
-                    </div>
-                    <div id="inv-total-value" class="text-2xl sm:text-3xl font-extrabold text-indigo-600">₱0.00</div>
-                    <div class="text-xs text-slate-500 mt-1">Capital + Accrued Profit</div>
-                </div>
-
+                <!-- Available Loan Limit -->
                 <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
                     <div class="flex items-center justify-between mb-3">
                         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Available Loan Limit</span>
-                        <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <div class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
                             <i class="fa-solid fa-hand-holding-heart"></i>
                         </div>
                     </div>
@@ -693,22 +672,34 @@
             <!-- Investor Sub-Navigation Tabs -->
             <div class="flex flex-wrap gap-2 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
                 <button id="inv-tab-portfolio" onclick="switchInvestorTab('portfolio')" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold bg-emerald-600 text-white shadow-sm transition">
-                    <i class="fa-solid fa-coins mr-1.5"></i> Investment Portfolio
+                    <i class="fa-solid fa-coins mr-1.5"></i> Investment Portfolio (1-Yr Lock)
+                </button>
+                <button id="inv-tab-savings" onclick="switchInvestorTab('savings')" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-wallet mr-1.5 text-sky-600"></i> Withdraw 1% Interest (Savings Wallet)
                 </button>
                 <button id="inv-tab-loan" onclick="switchInvestorTab('loan')" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
                     <i class="fa-solid fa-hand-holding-dollar mr-1.5"></i> My Loans
                 </button>
             </div>
 
-            <!-- TAB A: INVESTMENT GROWTH & ADD CAPITAL -->
+            <!-- TAB A: INVESTMENT GROWTH & 1-YEAR FREEZE TRACKER -->
             <div id="inv-panel-portfolio" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
-                    <h3 class="font-bold text-lg text-slate-900 mb-1">New Capital Deposit</h3>
-                    <p class="text-xs text-slate-500 mb-4">Submit your deposit reference for administrator verification.</p>
+                    <h3 class="font-bold text-lg text-slate-900 mb-1">New Capital Investment</h3>
+                    <p class="text-xs text-slate-500 mb-4">Submit your investment deposit for administrator verification.</p>
+
+                    <div class="mb-4 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1">
+                        <div class="font-bold"><i class="fa-solid fa-lock mr-1"></i> Investment Terms & Auto-Interest:</div>
+                        <ul class="list-disc pl-4 space-y-0.5 text-[11px]">
+                            <li><strong>1-Year Lock-In:</strong> Naka-freeze ang principal amount na ininvest sa loob ng <strong>1 taon</strong> mula sa effective date.</li>
+                            <li><strong>Auto 1% Monthly:</strong> Bawat buwan pagkatapos maging effective, automatic na papasok ang <strong>1% interest</strong> sa iyong <strong>Savings Wallet</strong>.</li>
+                            <li><strong>Interest Withdrawal Only:</strong> Ang interest lang na nasa Savings Wallet ang pwedeng i-withdraw.</li>
+                        </ul>
+                    </div>
 
                     <form onsubmit="submitInvestmentDeposit(event)" class="space-y-4">
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Deposit Amount (₱)</label>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Investment Amount (₱)</label>
                             <input type="number" id="inv-deposit-amount" min="1000" step="500" required placeholder="10000" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none font-bold text-slate-900">
                         </div>
 
@@ -718,23 +709,24 @@
                         </div>
 
                         <button type="submit" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition">
-                            Submit Deposit Request
+                            Submit Investment Request
                         </button>
                     </form>
                 </div>
 
                 <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
-                    <h3 class="font-bold text-lg text-slate-900 mb-1">Investment History</h3>
-                    <p class="text-xs text-slate-500 mb-4">Record of your capital deposits and verification status</p>
+                    <h3 class="font-bold text-lg text-slate-900 mb-1">Investment Tranches & 1-Year Freeze Schedule</h3>
+                    <p class="text-xs text-slate-500 mb-4">1% monthly return automatically transfers to your Savings Wallet every monthly anniversary.</p>
 
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                                    <th class="py-3 px-2">Date</th>
-                                    <th class="py-3 px-2">Reference No.</th>
-                                    <th class="py-3 px-2">Amount</th>
-                                    <th class="py-3 px-2 text-right">Status</th>
+                                    <th class="py-3 px-2">Effective / Unlock Date</th>
+                                    <th class="py-3 px-2">Principal (Frozen)</th>
+                                    <th class="py-3 px-2">1%/Mo Payout</th>
+                                    <th class="py-3 px-2">Next Auto-Credit</th>
+                                    <th class="py-3 px-2 text-right">Lock Status</th>
                                 </tr>
                             </thead>
                             <tbody id="inv-deposits-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
@@ -743,7 +735,83 @@
                 </div>
             </div>
 
-            <!-- TAB B: INVESTOR LOAN APPLICATION PANEL -->
+            <!-- TAB B: INVESTOR SAVINGS WALLET (WITHDRAW 1% MONTHLY INTEREST ONLY) -->
+            <div id="inv-panel-savings" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-sky-200 shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-money-bill-transfer"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-900">Withdraw Earned Interest</h3>
+                            <p class="text-xs font-semibold text-sky-700">From Savings Wallet • 1–2 Working Days Processing</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Frozen Invested Principal (1-Yr Lock):</span>
+                            <span id="inv-locked-summary" class="font-bold text-amber-700">₱0.00</span>
+                        </div>
+                        <div class="flex justify-between pt-1.5 border-t border-slate-200">
+                            <span class="font-bold text-slate-700">Withdrawable Interest (Savings Wallet):</span>
+                            <span id="inv-withdrawable-hint" class="font-extrabold text-emerald-700">₱0.00</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 pt-1">
+                            <i class="fa-solid fa-circle-info text-sky-600 mr-1"></i>
+                            Ang interest lang na pumasok sa Savings Wallet ang maaaring i-withdraw (1–2 working days bago ma-approve ng Admin).
+                        </p>
+                    </div>
+
+                    <form onsubmit="submitSavingsWithdrawal(event, 'investor')" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Withdrawal Amount (₱)</label>
+                            <input type="number" id="inv-withdraw-amount" min="100" step="50" required placeholder="500" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-sky-500 outline-none font-bold text-slate-900">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Payout Method</label>
+                            <select id="inv-withdraw-method" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-sky-500 outline-none text-sm font-semibold bg-white">
+                                <option value="GCash">GCash Transfer</option>
+                                <option value="Maya">Maya Transfer</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                                <option value="Cash Pickup">Cash Pickup</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Account Name & Number</label>
+                            <input type="text" id="inv-withdraw-account" required placeholder="e.g., Juan Dela Cruz - 0917 123 4567" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-sky-500 outline-none text-sm">
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 px-4 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl shadow-md transition">
+                            Withdraw Interest from Savings
+                        </button>
+                    </form>
+                </div>
+
+                <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-lg text-slate-900 mb-1">Savings Wallet Ledger (1% Auto-Yields & Withdrawals)</h3>
+                    <p class="text-xs text-slate-500 mb-4">Record of your automatic 1% monthly interest credits and interest withdrawals.</p>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                    <th class="py-3 px-2">Date</th>
+                                    <th class="py-3 px-2">Activity</th>
+                                    <th class="py-3 px-2">Details</th>
+                                    <th class="py-3 px-2">Amount</th>
+                                    <th class="py-3 px-2 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inv-savings-ledger-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB C: INVESTOR LOAN APPLICATION PANEL -->
             <div id="inv-panel-loan" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
                     <h3 class="font-bold text-lg text-slate-900 mb-1">Apply for a Loan</h3>
@@ -829,7 +897,7 @@
         </section>
 
         <!-- =================================================================
-             4. ADMIN CONTROL CENTER
+             4. ADMIN CONTROL CENTER (WITH BUSINESS CASHFLOW & GROWTH CHART)
         ================================================================== -->
         <section id="admin-dashboard" class="hidden space-y-6 w-full self-start">
             <!-- Admin Top Banner -->
@@ -839,7 +907,7 @@
                         <i class="fa-solid fa-shield-halved"></i> Administrator Access
                     </span>
                     <h2 class="text-2xl font-extrabold text-slate-900">Admin Control Center</h2>
-                    <p class="text-sm text-slate-500">Create member accounts, review loan forms, deduct payments, and approve savings deposits & withdrawals.</p>
+                    <p class="text-sm text-slate-500">Monitor business cashflow growth, manage members, review loans, and approve savings & investments.</p>
                 </div>
                 <button onclick="openCreateMemberModal()" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-md shadow-emerald-600/20 transition">
                     <i class="fa-solid fa-user-plus"></i>
@@ -849,46 +917,162 @@
 
             <!-- Admin Summary Metrics -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
-                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Total Members</div>
-                    <div id="admin-kpi-members" class="text-2xl font-extrabold text-indigo-600">0</div>
-                    <div class="text-xs text-slate-500 mt-1">Registered borrowers & investors</div>
+                <div class="bg-gradient-to-br from-slate-900 to-emerald-950 text-white rounded-3xl p-5 shadow-md">
+                    <div class="text-xs font-bold uppercase tracking-wider text-emerald-300 mb-1">Net Business Cash on Hand</div>
+                    <div id="admin-kpi-net-cash" class="text-2xl font-extrabold text-white">₱0.00</div>
+                    <div class="text-[11px] text-slate-300 mt-1">Cash In minus Cash Out</div>
                 </div>
                 <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
-                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Active Loans</div>
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Active Loans Disbursed</div>
                     <div id="admin-kpi-disbursed" class="text-2xl font-extrabold text-slate-900">₱0.00</div>
-                    <div class="text-xs text-slate-500 mt-1">Total active principal disbursed</div>
+                    <div class="text-xs text-slate-500 mt-1">Total active principal out</div>
                 </div>
                 <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Total Member Savings</div>
                     <div id="admin-kpi-savings" class="text-2xl font-extrabold text-sky-600">₱0.00</div>
-                    <div class="text-xs text-slate-500 mt-1">Earning 4% p.a. monthly interest</div>
+                    <div class="text-xs text-slate-500 mt-1">Includes investor auto-yields</div>
                 </div>
                 <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Pending Approvals</div>
                     <div id="admin-kpi-pending-total" class="text-2xl font-extrabold text-amber-600">0</div>
-                    <div class="text-xs text-slate-500 mt-1">Loans, savings & deposits</div>
+                    <div class="text-xs text-slate-500 mt-1">Loans, savings & investments</div>
                 </div>
             </div>
 
             <!-- Admin Management Tabs -->
             <div class="flex flex-wrap gap-2 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
-                <button id="admin-tab-members" onclick="switchAdminTab('members')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-900 text-white shadow-sm transition">
-                    <i class="fa-solid fa-users-gear mr-1.5"></i> Member Accounts
+                <button id="admin-tab-cashflow" onclick="switchAdminTab('cashflow')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-slate-900 text-white shadow-sm transition">
+                    <i class="fa-solid fa-chart-line mr-1.5 text-emerald-400"></i> Business Cashflow & Chart
+                </button>
+                <button id="admin-tab-members" onclick="switchAdminTab('members')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-users-gear mr-1.5"></i> Members (<span id="admin-kpi-members">0</span>)
                 </button>
                 <button id="admin-tab-loans" onclick="switchAdminTab('loans')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
                     <i class="fa-solid fa-file-signature mr-1.5"></i> Loans (<span id="admin-badge-loans">0</span>)
                 </button>
                 <button id="admin-tab-savings" onclick="switchAdminTab('savings')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
-                    <i class="fa-solid fa-piggy-bank mr-1.5"></i> Savings Deposit & Withdraw (<span id="admin-badge-savings">0</span>)
+                    <i class="fa-solid fa-piggy-bank mr-1.5"></i> Savings (<span id="admin-badge-savings">0</span>)
                 </button>
                 <button id="admin-tab-deposits" onclick="switchAdminTab('deposits')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
                     <i class="fa-solid fa-money-bill-transfer mr-1.5"></i> Investments (<span id="admin-badge-deposits">0</span>)
                 </button>
             </div>
 
+            <!-- ADMIN PANEL 0: BUSINESS CASHFLOW & GROWTH CHART -->
+            <div id="admin-panel-cashflow" class="space-y-6">
+                <!-- Cash In / Cash Out / Growth Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white rounded-3xl p-5 border border-emerald-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Total Cash In (Pera na Pumasok)</span>
+                            <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="fa-solid fa-arrow-down-long"></i></span>
+                        </div>
+                        <div id="cf-total-in" class="text-2xl sm:text-3xl font-black text-emerald-700">₱0.00</div>
+                        <p class="text-[11px] text-slate-500 mt-1">Investor capital, member deposits, loan repayments & manual inflows</p>
+                    </div>
+
+                    <div class="bg-white rounded-3xl p-5 border border-rose-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-rose-700">Total Cash Out (Pera na Lumabas)</span>
+                            <span class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center"><i class="fa-solid fa-arrow-up-long"></i></span>
+                        </div>
+                        <div id="cf-total-out" class="text-2xl sm:text-3xl font-black text-rose-600">₱0.00</div>
+                        <p class="text-[11px] text-slate-500 mt-1">Loans released, approved savings withdrawals & manual expenses</p>
+                    </div>
+
+                    <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Business Fund Growth Status</span>
+                            <span id="cf-growth-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800">Positive</span>
+                        </div>
+                        <div id="cf-net-balance" class="text-2xl sm:text-3xl font-black text-slate-900">₱0.00</div>
+                        <p id="cf-growth-caption" class="text-[11px] text-slate-500 mt-1">Available revolving cash for new loans & payouts</p>
+                    </div>
+                </div>
+
+                <!-- Chart + Manual Cashflow Adjustment Form -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Business Growth Line & Bar Chart -->
+                    <div class="lg:col-span-8 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                            <div>
+                                <h3 class="font-bold text-lg text-slate-900">Business Fund Growth Chart</h3>
+                                <p class="text-xs text-slate-500">Visual tracker ng pagtaas ng pera ng business (Cumulative Cash Balance vs. Monthly Cash In/Out).</p>
+                            </div>
+                        </div>
+                        <div class="relative h-72 w-full">
+                            <canvas id="admin-cashflow-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Record Manual Cash In / Cash Out (Initial Capital / Business Expenses) -->
+                    <div class="lg:col-span-4 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-lg text-slate-900 mb-1">Record Business Cashflow</h3>
+                        <p class="text-xs text-slate-500 mb-4">Magdagdag ng starting capital (Cash In) o operational expense (Cash Out).</p>
+
+                        <form onsubmit="submitManualCashflow(event)" class="space-y-3.5">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Transaction Type</label>
+                                <select id="cf-entry-type" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-bold bg-white">
+                                    <option value="in">Cash In (+ Pera na Pumasok / Capital)</option>
+                                    <option value="out">Cash Out (- Pera na Lumabas / Expense)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Category</label>
+                                <input type="text" id="cf-entry-category" required placeholder="e.g., Owner Starting Capital, Office Expense" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Amount (₱)</label>
+                                    <input type="number" id="cf-entry-amount" min="1" step="0.01" required placeholder="10000" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none font-bold text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Date</label>
+                                    <input type="date" id="cf-entry-date" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-xs font-semibold">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Notes / Description</label>
+                                <input type="text" id="cf-entry-desc" placeholder="Optional details" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm">
+                            </div>
+
+                            <button type="submit" class="w-full py-3 px-4 bg-slate-900 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-md transition text-sm">
+                                Save Cashflow Entry
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Chronological Business Cashflow Ledger -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                    <div class="mb-4">
+                        <h3 class="font-bold text-lg text-slate-900">Complete Business Cashflow Ledger</h3>
+                        <p class="text-xs text-slate-500">Live summary ng lahat ng perang pumasok at lumabas sa buong lending & investment operation.</p>
+                    </div>
+                    <div class="overflow-x-auto max-h-96">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                    <th class="py-3 px-3">Date</th>
+                                    <th class="py-3 px-3">Category</th>
+                                    <th class="py-3 px-3">Description / Member</th>
+                                    <th class="py-3 px-3 text-right">Cash In (+Pumasok)</th>
+                                    <th class="py-3 px-3 text-right">Cash Out (-Lumabas)</th>
+                                    <th class="py-3 px-3 text-right">Running Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-cashflow-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- ADMIN PANEL 1: MEMBER ACCOUNTS TABLE -->
-            <div id="admin-panel-members" class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+            <div id="admin-panel-members" class="hidden bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
                 <div class="mb-4">
                     <h3 class="font-bold text-lg text-slate-900">Member Accounts Directory</h3>
                     <p class="text-xs text-slate-500">Create new member logins or click <strong>Edit Account</strong> to update limits, balances, and roles.</p>
@@ -901,9 +1085,9 @@
                                 <th class="py-3 px-3">Member & Profile</th>
                                 <th class="py-3 px-3">Credit Score</th>
                                 <th class="py-3 px-3">Max Loan Limit</th>
-                                <th class="py-3 px-3">Savings</th>
+                                <th class="py-3 px-3">Savings Wallet</th>
                                 <th class="py-3 px-3">Invested Capital</th>
-                                <th class="py-3 px-3">Accrued Profit</th>
+                                <th class="py-3 px-3">Accrued Interest</th>
                                 <th class="py-3 px-3 text-right">Action</th>
                             </tr>
                         </thead>
@@ -935,16 +1119,16 @@
                 </div>
             </div>
 
-            <!-- ADMIN PANEL 3: SAVINGS DEPOSIT & WITHDRAW APPROVALS + 4% P.A. INTEREST -->
+            <!-- ADMIN PANEL 3: SAVINGS DEPOSIT & WITHDRAW APPROVALS -->
             <div id="admin-panel-savings" class="hidden bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                     <div>
                         <h3 class="font-bold text-lg text-slate-900">Member Savings Deposits & Withdrawals</h3>
-                        <p class="text-xs text-slate-500">Approve Cash/Online deposits to add to Savings, approve Withdrawals (1–2 working days) to deduct from Savings, or credit 4% p.a. monthly interest.</p>
+                        <p class="text-xs text-slate-500">Approve Cash/Online deposits, approve Withdrawals (1–2 working days), or credit 4% p.a. monthly borrower savings interest.</p>
                     </div>
                     <button onclick="creditMonthlySavingsInterestToAll()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-sm transition">
                         <i class="fa-solid fa-percent"></i>
-                        <span>Credit Monthly 4% p.a. Interest to Savers</span>
+                        <span>Credit Monthly 4% p.a. Borrower Savings Interest</span>
                     </button>
                 </div>
 
@@ -966,19 +1150,20 @@
                 </div>
             </div>
 
-            <!-- ADMIN PANEL 4: INVESTOR DEPOSIT APPROVALS -->
+            <!-- ADMIN PANEL 4: INVESTOR DEPOSIT APPROVALS (1-YR FREEZE + AUTO 1%/MO) -->
             <div id="admin-panel-deposits" class="hidden bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
-                <h3 class="font-bold text-lg text-slate-900 mb-1">Investment Deposits</h3>
-                <p class="text-xs text-slate-500 mb-4">Approving a deposit automatically credits the amount to the investor's Invested Capital.</p>
+                <h3 class="font-bold text-lg text-slate-900 mb-1">Investor Capital Deposits (1-Yr Freeze + Auto 1%/Mo Yield)</h3>
+                <p class="text-xs text-slate-500 mb-4">Approving an investment locks the principal for 1 year and schedules automatic 1% monthly interest payouts to the investor's Savings Wallet.</p>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                                 <th class="py-3 px-3">Investor</th>
-                                <th class="py-3 px-3">Date</th>
+                                <th class="py-3 px-3">Effective / 1-Yr Unlock</th>
                                 <th class="py-3 px-3">Reference No.</th>
                                 <th class="py-3 px-3">Amount</th>
+                                <th class="py-3 px-3">Next 1% Payout</th>
                                 <th class="py-3 px-3">Status</th>
                                 <th class="py-3 px-3 text-right">Actions</th>
                             </tr>
@@ -992,7 +1177,7 @@
     </main>
 
     <!-- =====================================================================
-         MODAL: STANDARD LOAN APPLICATION FORM (Required Before Loan Submission)
+         MODAL: STANDARD LOAN APPLICATION FORM
     ====================================================================== -->
     <div id="loan-application-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
         <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 my-auto">
@@ -1011,7 +1196,6 @@
                 </button>
             </div>
 
-            <!-- Selected Loan Summary Banner -->
             <div class="mb-5 p-4 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                 <div>
                     <div class="text-slate-400 font-bold uppercase text-[10px]">Loan Type</div>
@@ -1028,7 +1212,6 @@
             </div>
 
             <form onsubmit="finalSubmitLoanApplication(event)" class="space-y-4">
-                <!-- 1. Purpose of Loan -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Purpose Category</label>
@@ -1049,7 +1232,6 @@
                     </div>
                 </div>
 
-                <!-- 2. Disbursement / How to Receive Loan Proceeds -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Disbursement Method</label>
@@ -1066,7 +1248,6 @@
                     </div>
                 </div>
 
-                <!-- 3. Co-Maker / Character Reference (Usual in Loan Applications) -->
                 <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-700">
                         <i class="fa-solid fa-user-shield text-emerald-600 mr-1"></i> Co-Maker / Emergency Reference
@@ -1087,7 +1268,6 @@
                     </div>
                 </div>
 
-                <!-- 4. Borrower Certification Checkbox -->
                 <label class="flex items-start gap-2.5 text-xs text-slate-600 cursor-pointer select-none">
                     <input type="checkbox" id="app-agree-checkbox" required class="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
                     <span>I hereby certify that the information above is true and correct, and I agree to pay my scheduled dues on or before the due date.</span>
@@ -1254,7 +1434,7 @@
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Savings Balance (₱)</label>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Savings Wallet Balance (₱)</label>
                         <input type="number" id="edit-savings" min="0" step="100" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none font-bold">
                     </div>
                     <div>
@@ -1277,7 +1457,7 @@
                             <input type="number" id="edit-invested-capital" min="0" step="500" required class="w-full px-3.5 py-2 rounded-xl border border-emerald-200 bg-white focus:border-emerald-500 outline-none font-bold">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Accrued Earnings / Profit (₱)</label>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Accrued Interest (₱)</label>
                             <input type="number" id="edit-accrued-earnings" min="0" step="50" required class="w-full px-3.5 py-2 rounded-xl border border-emerald-200 bg-white focus:border-emerald-500 outline-none font-bold text-emerald-700">
                         </div>
                     </div>
@@ -1397,7 +1577,6 @@
             ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
             : null;
 
-        // Secondary non-persisting client so Admin can create member accounts without replacing own session
         const adminCreateClient = (isSupabaseConfigured && window.supabase)
             ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                 auth: {
@@ -1410,6 +1589,7 @@
 
         let currentUser = null;
         let pendingLoanDraft = null;
+        let cashflowChartInstance = null;
 
         /**
          * ===================================================================
@@ -1425,6 +1605,12 @@
 
         function getTodayStr() {
             return new Date().toISOString().split('T')[0];
+        }
+
+        function addYearsToDateStr(baseDateStr, years = 1) {
+            const d = baseDateStr ? new Date(baseDateStr + 'T00:00:00') : new Date();
+            d.setFullYear(d.getFullYear() + years);
+            return d.toISOString().split('T')[0];
         }
 
         function advanceDueDateByFrequency(baseDateStr, frequency = 'monthly') {
@@ -1531,7 +1717,102 @@
 
         /**
          * ===================================================================
-         * 2. NOTIFICATION BELL LOGIC
+         * 2. AUTO 1% MONTHLY INVESTOR YIELD -> SAVINGS WALLET ENGINE
+         *    - Runs automatically on dashboard load
+         *    - Credits 1% of each approved investment every month after effective_date
+         *      directly into the investor's Savings Wallet (savings_balance)
+         * ===================================================================
+         */
+        async function processAutoInvestorYields(db) {
+            if (!supabaseClient) return false;
+            const today = getTodayStr();
+            let anyCredited = false;
+
+            const approvedInvestments = db.investments.filter(inv => inv.status === 'approved');
+            for (const inv of approvedInvestments) {
+                const effDate = inv.effective_date || (inv.created_at || today).split('T')[0];
+                const matDate = inv.maturity_date || addYearsToDateStr(effDate, 1);
+                let nextPayout = inv.next_payout_date || advanceDueDateByFrequency(effDate, 'monthly');
+
+                // Backfill schedule dates if missing on legacy approved records
+                if (!inv.effective_date || !inv.maturity_date || !inv.next_payout_date) {
+                    await supabaseClient.from('investments').update({
+                        effective_date: effDate,
+                        maturity_date: matDate,
+                        next_payout_date: nextPayout
+                    }).eq('id', inv.id);
+                }
+
+                let guard = 0;
+                let currentPaidYield = Number(inv.total_yield_paid || 0);
+
+                while (nextPayout <= today && nextPayout <= matDate && guard < 12) {
+                    guard++;
+                    const payoutCycleDate = nextPayout;
+                    const upcomingPayoutDate = advanceDueDateByFrequency(payoutCycleDate, 'monthly');
+                    const monthlyYield = Number((Number(inv.amount) * 0.01).toFixed(2));
+                    if (monthlyYield <= 0) break;
+
+                    // Optimistic lock update so duplicate tabs cannot double-credit the same cycle
+                    const { data: updatedRows, error: lockErr } = await supabaseClient
+                        .from('investments')
+                        .update({
+                            next_payout_date: upcomingPayoutDate,
+                            total_yield_paid: currentPaidYield + monthlyYield
+                        })
+                        .eq('id', inv.id)
+                        .eq('next_payout_date', payoutCycleDate)
+                        .select();
+
+                    if (lockErr || !updatedRows || updatedRows.length === 0) {
+                        break;
+                    }
+
+                    currentPaidYield += monthlyYield;
+                    nextPayout = upcomingPayoutDate;
+                    anyCredited = true;
+
+                    // Credit 1% return directly to Investor's Savings Wallet & Accrued Interest
+                    const { data: invProf } = await supabaseClient
+                        .from('profiles')
+                        .select('savings_balance, accrued_earnings')
+                        .eq('id', inv.investor_id)
+                        .single();
+
+                    if (invProf) {
+                        const newSavings = Number(invProf.savings_balance || 0) + monthlyYield;
+                        const newAccrued = Number(invProf.accrued_earnings || 0) + monthlyYield;
+                        await supabaseClient.from('profiles').update({
+                            savings_balance: newSavings,
+                            accrued_earnings: newAccrued
+                        }).eq('id', inv.investor_id);
+
+                        await supabaseClient.from('savings_deposits').insert([{
+                            user_id: inv.investor_id,
+                            member_name: inv.investor_name,
+                            transaction_type: 'deposit',
+                            amount: monthlyYield,
+                            payment_method: 'Investor Auto-Yield (1%/mo)',
+                            reference_no: `Auto 1% Monthly Return on ${formatPHP(inv.amount)} (${payoutCycleDate})`,
+                            status: 'approved'
+                        }]);
+
+                        await createNotification(
+                            inv.investor_id,
+                            '1% Monthly Investment Yield Credited!',
+                            `${formatPHP(monthlyYield)} (1% monthly return) has been automatically deposited into your Savings Wallet and is ready for withdrawal.`,
+                            'investment'
+                        );
+                    }
+                }
+            }
+
+            return anyCredited;
+        }
+
+        /**
+         * ===================================================================
+         * 3. NOTIFICATION BELL LOGIC
          * ===================================================================
          */
         function toggleNotificationDropdown() {
@@ -1603,7 +1884,7 @@
 
         /**
          * ===================================================================
-         * 3. SIGN IN, CHANGE PASSWORD & LOGOUT
+         * 4. SIGN IN, CHANGE PASSWORD & LOGOUT
          * ===================================================================
          */
         async function handleLogin(e) {
@@ -1710,18 +1991,21 @@
 
         /**
          * ===================================================================
-         * 4. DATA FETCHING & ROLE-BASED ROUTER
+         * 5. DATA FETCHING & ROLE-BASED ROUTER
          * ===================================================================
          */
         async function fetchAllData() {
-            if (!supabaseClient) return { profiles: [], loans: [], investments: [], savings: [], notifications: [] };
+            if (!supabaseClient) {
+                return { profiles: [], loans: [], investments: [], savings: [], notifications: [], cashflow: [] };
+            }
 
-            const [profilesRes, loansRes, invRes, savRes, notifRes] = await Promise.all([
+            const [profilesRes, loansRes, invRes, savRes, notifRes, cfRes] = await Promise.all([
                 supabaseClient.from('profiles').select('*').order('created_at', { ascending: true }),
                 supabaseClient.from('loans').select('*').order('created_at', { ascending: false }),
                 supabaseClient.from('investments').select('*').order('created_at', { ascending: false }),
                 supabaseClient.from('savings_deposits').select('*').order('created_at', { ascending: false }),
-                supabaseClient.from('notifications').select('*').order('created_at', { ascending: false })
+                supabaseClient.from('notifications').select('*').order('created_at', { ascending: false }),
+                supabaseClient.from('business_cashflow').select('*').order('entry_date', { ascending: false })
             ]);
 
             return {
@@ -1729,14 +2013,22 @@
                 loans: loansRes.data || [],
                 investments: invRes.data || [],
                 savings: savRes.data || [],
-                notifications: notifRes.data || []
+                notifications: notifRes.data || [],
+                cashflow: cfRes.data || []
             };
         }
 
         async function renderActiveDashboard() {
             if (!currentUser) return;
 
-            const db = await fetchAllData();
+            let db = await fetchAllData();
+
+            // Run auto 1% monthly investor yield engine; re-fetch if any yields were credited
+            const credited = await processAutoInvestorYields(db);
+            if (credited) {
+                db = await fetchAllData();
+            }
+
             const freshUser = db.profiles.find(p => p.id === currentUser.id);
             if (freshUser) currentUser = freshUser;
 
@@ -1764,7 +2056,7 @@
 
         /**
          * ===================================================================
-         * 5. BORROWER DASHBOARD & CALCULATORS
+         * 6. BORROWER DASHBOARD & CALCULATORS
          * ===================================================================
          */
         function switchUserDashboardTab(tab) {
@@ -1837,7 +2129,6 @@
             document.getElementById('amort-limit-hint').textContent = formatPHP(availableLimit);
             document.getElementById('user-active-balance').textContent = formatPHP(remainingBalanceTotal);
 
-            // Savings & 4% p.a. Monthly Interest + Available to Withdraw
             const savingsBal = Number(currentUser.savings_balance || 0);
             const monthlySavingsInt = savingsBal * (0.04 / 12);
             const mySavingsAll = db.savings.filter(s => s.user_id === currentUser.id);
@@ -1852,7 +2143,6 @@
             document.getElementById('savings-tab-interest').textContent = '+' + formatPHP(monthlySavingsInt) + ' / mo';
             document.getElementById('withdraw-available-hint').textContent = formatPHP(availableWithdraw);
 
-            // Earliest Due Date
             if (activeApprovedLoans.length > 0) {
                 const sorted = [...activeApprovedLoans].filter(l => l.due_date).sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
                 if (sorted.length > 0) {
@@ -1868,7 +2158,7 @@
                 document.getElementById('user-due-status').textContent = 'Auto-scheduled upon fund release';
             }
 
-            // Render Balloon Loans Table
+            // Balloon Loans Table
             const balloonLoans = myLoans.filter(l => l.loan_type === 'balloon');
             const balloonTbody = document.getElementById('user-balloon-tbody');
             if (balloonLoans.length === 0) {
@@ -1888,7 +2178,7 @@
                 `).join('');
             }
 
-            // Render Amortized Loans Table
+            // Amortized Loans Table
             const amortLoans = myLoans.filter(l => l.loan_type !== 'balloon');
             const amortTbody = document.getElementById('user-amort-tbody');
             if (amortLoans.length === 0) {
@@ -1915,7 +2205,7 @@
                 }).join('');
             }
 
-            // Render Savings Deposit History Table
+            // Savings Deposit History
             const myDeposits = mySavingsAll.filter(s => s.transaction_type !== 'withdraw');
             const depTbody = document.getElementById('user-savings-deposit-tbody');
             if (myDeposits.length === 0) {
@@ -1936,7 +2226,7 @@
                 `).join('');
             }
 
-            // Render Savings Withdraw History Table
+            // Savings Withdraw History
             const myWithdrawals = mySavingsAll.filter(s => s.transaction_type === 'withdraw');
             const withTbody = document.getElementById('user-savings-withdraw-tbody');
             if (myWithdrawals.length === 0) {
@@ -1957,7 +2247,6 @@
             }
         }
 
-        // Balloon Preview (7%/mo, No Terms)
         function calculateBalloonPreview() {
             const amount = Number(document.getElementById('balloon-amount').value || 0);
             const monthlyInt = amount * 0.07;
@@ -1965,7 +2254,6 @@
             document.getElementById('balloon-calc-interest').textContent = formatPHP(monthlyInt) + ' / mo';
         }
 
-        // Amortized Preview (Shows Principal Amount & Payment Due ONLY; supports Daily/Weekly/Bi-Weekly/Monthly)
         function calculateAmortizedPreview() {
             const amount = Number(document.getElementById('amort-amount').value || 0);
             const months = Number(document.getElementById('amort-term').value || 1);
@@ -1980,7 +2268,6 @@
             document.getElementById('amort-calc-due').textContent = formatPHP(paymentDue);
         }
 
-        // Step 1 of Loan Submission: Validate limit & open Standard Loan Application Form Modal
         async function proceedToLoanForm(e, sourceMode) {
             e.preventDefault();
 
@@ -2033,7 +2320,6 @@
                 paymentDue
             };
 
-            // Populate Summary Banner inside Standard Loan Application Modal
             document.getElementById('app-summary-type').textContent =
                 loanType === 'balloon'
                     ? 'Balloon Loan (7%/mo • No Term)'
@@ -2043,7 +2329,6 @@
                 loanType === 'balloon' ? 'Monthly Interest Due' : `${formatFrequencyLabel(frequency)} Payment Due`;
             document.getElementById('app-summary-due').textContent = formatPHP(paymentDue);
 
-            // Pre-fill disbursement account name/number from profile if empty
             if (!document.getElementById('app-disbursement-account').value && currentUser.full_name) {
                 document.getElementById('app-disbursement-account').value =
                     `${currentUser.full_name}${currentUser.contact_number ? ' - ' + currentUser.contact_number : ''}`;
@@ -2060,7 +2345,6 @@
             modal.classList.remove('flex');
         }
 
-        // Step 2 of Loan Submission: Submit completed Standard Loan Application Form
         async function finalSubmitLoanApplication(e) {
             e.preventDefault();
             if (!pendingLoanDraft) return;
@@ -2109,7 +2393,6 @@
                 closeLoanApplicationModal();
                 pendingLoanDraft = null;
 
-                // Reset calculator inputs
                 ['balloon-amount', 'amort-amount', 'inv-loan-amount'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.value = '';
@@ -2126,7 +2409,6 @@
             }
         }
 
-        // Savings Deposit & Withdraw Handlers
         function toggleSavingsRefField() {
             const method = document.getElementById('savings-method').value;
             const label = document.getElementById('savings-ref-label');
@@ -2167,11 +2449,15 @@
             await renderActiveDashboard();
         }
 
-        async function submitSavingsWithdrawal(e) {
+        async function submitSavingsWithdrawal(e, roleSource = 'user') {
             e.preventDefault();
-            const amount = Number(document.getElementById('withdraw-amount').value);
-            const method = document.getElementById('withdraw-method').value;
-            const account = document.getElementById('withdraw-account').value.trim();
+            const amountId = roleSource === 'investor' ? 'inv-withdraw-amount' : 'withdraw-amount';
+            const methodId = roleSource === 'investor' ? 'inv-withdraw-method' : 'withdraw-method';
+            const accountId = roleSource === 'investor' ? 'inv-withdraw-account' : 'withdraw-account';
+
+            const amount = Number(document.getElementById(amountId).value);
+            const method = document.getElementById(methodId).value;
+            const account = document.getElementById(accountId).value.trim();
 
             const db = await fetchAllData();
             const savingsBal = Number(currentUser.savings_balance || 0);
@@ -2202,26 +2488,23 @@
 
         /**
          * ===================================================================
-         * 6. INVESTOR DASHBOARD LOGIC
+         * 7. INVESTOR DASHBOARD LOGIC (1-YR FREEZE + AUTO 1%/MO TO SAVINGS)
          * ===================================================================
          */
         function switchInvestorTab(tab) {
-            const pPort = document.getElementById('inv-panel-portfolio');
-            const pLoan = document.getElementById('inv-panel-loan');
-            const tPort = document.getElementById('inv-tab-portfolio');
-            const tLoan = document.getElementById('inv-tab-loan');
-
-            if (tab === 'portfolio') {
-                pPort.classList.remove('hidden');
-                pLoan.classList.add('hidden');
-                tPort.className = 'flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold bg-emerald-600 text-white shadow-sm transition';
-                tLoan.className = 'flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition';
-            } else {
-                pPort.classList.add('hidden');
-                pLoan.classList.remove('hidden');
-                tLoan.className = 'flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-900 text-white shadow-sm transition';
-                tPort.className = 'flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition';
-            }
+            const tabs = ['portfolio', 'savings', 'loan'];
+            tabs.forEach(t => {
+                const panel = document.getElementById(`inv-panel-${t}`);
+                const btn = document.getElementById(`inv-tab-${t}`);
+                if (t === tab) {
+                    panel.classList.remove('hidden');
+                    const bg = t === 'portfolio' ? 'bg-emerald-600' : t === 'savings' ? 'bg-sky-600' : 'bg-slate-900';
+                    btn.className = `flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold ${bg} text-white shadow-sm transition`;
+                } else {
+                    panel.classList.add('hidden');
+                    btn.className = 'flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition';
+                }
+            });
         }
 
         function toggleInvestorLoanType() {
@@ -2267,9 +2550,20 @@
 
             const capital = Number(currentUser.invested_capital || 0);
             const earnings = Number(currentUser.accrued_earnings || 0);
+            const savingsWallet = Number(currentUser.savings_balance || 0);
+
+            const mySavingsAll = db.savings.filter(s => s.user_id === currentUser.id);
+            const pendingWithdrawalsSum = mySavingsAll
+                .filter(s => s.transaction_type === 'withdraw' && s.status === 'pending')
+                .reduce((sum, s) => sum + Number(s.amount), 0);
+            const withdrawableInterest = Math.max(0, savingsWallet - pendingWithdrawalsSum);
+
             document.getElementById('inv-capital').textContent = formatPHP(capital);
+            document.getElementById('inv-savings-wallet').textContent = formatPHP(savingsWallet);
+            document.getElementById('inv-monthly-rate-amt').textContent = formatPHP(capital * 0.01);
             document.getElementById('inv-earnings').textContent = formatPHP(earnings);
-            document.getElementById('inv-total-value').textContent = formatPHP(capital + earnings);
+            document.getElementById('inv-locked-summary').textContent = formatPHP(capital);
+            document.getElementById('inv-withdrawable-hint').textContent = formatPHP(withdrawableInterest);
 
             const myLoans = db.loans.filter(l => l.user_id === currentUser.id);
             const activeApproved = myLoans.filter(l => l.status === 'approved');
@@ -2283,21 +2577,64 @@
             document.getElementById('inv-form-limit-hint').textContent = formatPHP(availableLimit);
             document.getElementById('inv-active-balance').textContent = formatPHP(activeRem);
 
+            // Investment Tranches Table (with 1-Year Freeze & Auto 1% Payout Date)
+            const today = getTodayStr();
             const myDeposits = db.investments.filter(i => i.investor_id === currentUser.id);
             const depTbody = document.getElementById('inv-deposits-tbody');
             if (myDeposits.length === 0) {
-                depTbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-400 text-xs">No investment deposit records found.</td></tr>`;
+                depTbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 text-xs">No investment deposit records found.</td></tr>`;
             } else {
-                depTbody.innerHTML = myDeposits.map(dep => `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="py-3 px-2 text-xs text-slate-500">${(dep.created_at || '').split('T')[0]}</td>
-                        <td class="py-3 px-2 font-semibold text-slate-800">${dep.reference_no}</td>
-                        <td class="py-3 px-2 font-bold text-emerald-700">${formatPHP(dep.amount)}</td>
-                        <td class="py-3 px-2 text-right">${getStatusBadge(dep.status)}</td>
-                    </tr>
-                `).join('');
+                depTbody.innerHTML = myDeposits.map(dep => {
+                    const isApproved = dep.status === 'approved';
+                    const effDate = dep.effective_date || (dep.created_at || '').split('T')[0];
+                    const matDate = dep.maturity_date || addYearsToDateStr(effDate, 1);
+                    const isUnlocked = isApproved && today >= matDate;
+
+                    const lockBadge = !isApproved
+                        ? getStatusBadge(dep.status)
+                        : isUnlocked
+                        ? '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800"><i class="fa-solid fa-lock-open mr-1"></i>1-Yr Completed</span>'
+                        : '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800"><i class="fa-solid fa-lock mr-1"></i>Frozen (1-Yr Lock)</span>';
+
+                    return `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="py-3 px-2 text-xs">
+                                <div class="font-bold text-slate-800">${isApproved ? 'Eff: ' + effDate : 'Req: ' + effDate}</div>
+                                ${isApproved ? `<div class="text-[11px] text-amber-700 font-semibold">Unlock: ${matDate}</div>` : ''}
+                            </td>
+                            <td class="py-3 px-2 font-bold text-slate-900">${formatPHP(dep.amount)}</td>
+                            <td class="py-3 px-2 font-bold text-emerald-600">+${formatPHP(Number(dep.amount) * 0.01)} / mo</td>
+                            <td class="py-3 px-2 text-xs font-semibold text-sky-700">${isApproved ? (dep.next_payout_date || 'Scheduled') : 'Upon Approval'}</td>
+                            <td class="py-3 px-2 text-right">${lockBadge}</td>
+                        </tr>
+                    `;
+                }).join('');
             }
 
+            // Investor Savings Wallet Ledger (1% Auto-Yields & Withdrawals)
+            const invSavTbody = document.getElementById('inv-savings-ledger-tbody');
+            if (mySavingsAll.length === 0) {
+                invSavTbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 text-xs">No interest credits or withdrawal records yet.</td></tr>`;
+            } else {
+                invSavTbody.innerHTML = mySavingsAll.map(tx => {
+                    const isWithdraw = tx.transaction_type === 'withdraw';
+                    return `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="py-3 px-2 text-xs text-slate-500">${(tx.created_at || '').split('T')[0]}</td>
+                            <td class="py-3 px-2">
+                                <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isWithdraw ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
+                                    ${isWithdraw ? 'Interest Withdrawal' : tx.payment_method}
+                                </span>
+                            </td>
+                            <td class="py-3 px-2 text-xs text-slate-700">${tx.reference_no || '—'}</td>
+                            <td class="py-3 px-2 font-bold ${isWithdraw ? 'text-rose-600' : 'text-emerald-700'}">${isWithdraw ? '-' : '+'}${formatPHP(tx.amount)}</td>
+                            <td class="py-3 px-2 text-right">${getStatusBadge(tx.status)}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Personal Loans Table
             const loanTbody = document.getElementById('inv-loans-tbody');
             if (myLoans.length === 0) {
                 loanTbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 text-xs">No personal loan applications found.</td></tr>`;
@@ -2333,17 +2670,17 @@
             if (error) return showToast(error.message, 'error');
 
             e.target.reset();
-            showToast('Deposit request submitted for administrator verification.', 'success');
+            showToast('Investment deposit submitted! Principal locks for 1 year upon Admin approval.', 'success');
             await renderActiveDashboard();
         }
 
         /**
          * ===================================================================
-         * 7. ADMIN CONTROL CENTER
+         * 8. ADMIN CONTROL CENTER & BUSINESS CASHFLOW CHART
          * ===================================================================
          */
         function switchAdminTab(tab) {
-            const panels = ['members', 'loans', 'savings', 'deposits'];
+            const panels = ['cashflow', 'members', 'loans', 'savings', 'deposits'];
             panels.forEach(p => {
                 const panelEl = document.getElementById(`admin-panel-${p}`);
                 const tabEl = document.getElementById(`admin-tab-${p}`);
@@ -2355,6 +2692,10 @@
                     tabEl.className = 'flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-600 hover:bg-slate-100 transition';
                 }
             });
+
+            if (tab === 'cashflow' && cashflowChartInstance) {
+                setTimeout(() => cashflowChartInstance.resize(), 50);
+            }
         }
 
         function openCreateMemberModal() {
@@ -2436,8 +2777,260 @@
             }
         }
 
+        function computeAndRenderAdminCashflow(db) {
+            const entries = [];
+
+            // 1. Approved Investor Deposits -> Cash In
+            db.investments
+                .filter(i => i.status === 'approved')
+                .forEach(i => {
+                    entries.push({
+                        date: i.effective_date || (i.created_at || getTodayStr()).split('T')[0],
+                        category: 'Investor Capital In',
+                        description: `${i.investor_name} (${i.reference_no || 'Investment'})`,
+                        cashIn: Number(i.amount || 0),
+                        cashOut: 0
+                    });
+                });
+
+            // 2. Approved Member Savings Deposits (External Cash/Online only; internal yields are tracked on withdrawal) -> Cash In
+            db.savings
+                .filter(s => s.status === 'approved' && s.transaction_type !== 'withdraw' && !String(s.payment_method || '').includes('Interest') && !String(s.payment_method || '').includes('Auto-Yield'))
+                .forEach(s => {
+                    entries.push({
+                        date: (s.created_at || getTodayStr()).split('T')[0],
+                        category: 'Member Savings Deposit',
+                        description: `${s.member_name} (${s.payment_method})`,
+                        cashIn: Number(s.amount || 0),
+                        cashOut: 0
+                    });
+                });
+
+            // 3. Approved Savings & Investor Interest Withdrawals -> Cash Out
+            db.savings
+                .filter(s => s.status === 'approved' && s.transaction_type === 'withdraw')
+                .forEach(s => {
+                    entries.push({
+                        date: (s.created_at || getTodayStr()).split('T')[0],
+                        category: 'Savings / Yield Withdrawal',
+                        description: `${s.member_name} (${s.payment_method})`,
+                        cashIn: 0,
+                        cashOut: Number(s.amount || 0)
+                    });
+                });
+
+            // 4. Loans Disbursed (Cash Out) & Loan Payments Collected (Cash In)
+            db.loans
+                .filter(l => l.status === 'approved' || l.status === 'paid')
+                .forEach(l => {
+                    const releaseDate = l.received_date || (l.created_at || getTodayStr()).split('T')[0];
+                    entries.push({
+                        date: releaseDate,
+                        category: 'Loan Released (Disbursed)',
+                        description: `${l.applicant_name} — ${l.loan_type === 'balloon' ? 'Balloon' : 'Amortized'}`,
+                        cashIn: 0,
+                        cashOut: Number(l.amount || 0)
+                    });
+
+                    const paidAmt = Number(l.amount_paid || 0);
+                    if (paidAmt > 0) {
+                        entries.push({
+                            date: releaseDate,
+                            category: 'Loan Payment Collected',
+                            description: `${l.applicant_name} — Hulog / Interest Collected`,
+                            cashIn: paidAmt,
+                            cashOut: 0
+                        });
+                    }
+                });
+
+            // 5. Admin Manual Business Cashflow Entries
+            (db.cashflow || []).forEach(cf => {
+                entries.push({
+                    date: cf.entry_date || getTodayStr(),
+                    category: cf.category,
+                    description: cf.description || (cf.entry_type === 'in' ? 'Manual Cash In' : 'Manual Cash Out'),
+                    cashIn: cf.entry_type === 'in' ? Number(cf.amount || 0) : 0,
+                    cashOut: cf.entry_type === 'out' ? Number(cf.amount || 0) : 0
+                });
+            });
+
+            // Sort chronologically ascending to calculate running balance & monthly growth
+            entries.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            let runningBal = 0;
+            let totalIn = 0;
+            let totalOut = 0;
+            const monthlyMap = {};
+
+            const enriched = entries.map(item => {
+                totalIn += item.cashIn;
+                totalOut += item.cashOut;
+                runningBal += (item.cashIn - item.cashOut);
+
+                const monthKey = (item.date || getTodayStr()).slice(0, 7); // YYYY-MM
+                if (!monthlyMap[monthKey]) {
+                    monthlyMap[monthKey] = { in: 0, out: 0, endingBalance: runningBal };
+                }
+                monthlyMap[monthKey].in += item.cashIn;
+                monthlyMap[monthKey].out += item.cashOut;
+                monthlyMap[monthKey].endingBalance = runningBal;
+
+                return { ...item, runningBalance: runningBal };
+            });
+
+            // Update KPIs
+            document.getElementById('admin-kpi-net-cash').textContent = formatPHP(runningBal);
+            document.getElementById('cf-total-in').textContent = formatPHP(totalIn);
+            document.getElementById('cf-total-out').textContent = formatPHP(totalOut);
+            document.getElementById('cf-net-balance').textContent = formatPHP(runningBal);
+
+            const growthBadge = document.getElementById('cf-growth-badge');
+            const growthCaption = document.getElementById('cf-growth-caption');
+            if (runningBal > 0) {
+                growthBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800';
+                growthBadge.textContent = 'Tumataas / Positive';
+                growthCaption.textContent = `Business has ${formatPHP(runningBal)} net liquid cash available.`;
+            } else if (runningBal === 0) {
+                growthBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-100 text-slate-700';
+                growthBadge.textContent = 'Break-Even';
+                growthCaption.textContent = 'Cash inflows and outflows are currently equal.';
+            } else {
+                growthBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-rose-100 text-rose-800';
+                growthBadge.textContent = 'Outflow Heavy';
+                growthCaption.textContent = 'Total loans/withdrawals released exceed recorded cash inflows.';
+            }
+
+            // Render Cashflow Ledger (Newest first)
+            const cfTbody = document.getElementById('admin-cashflow-tbody');
+            if (enriched.length === 0) {
+                cfTbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 text-xs">No cashflow transactions yet. Approve deposits/loans or record starting capital above.</td></tr>`;
+            } else {
+                cfTbody.innerHTML = [...enriched].reverse().map(row => `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3 px-3 text-xs text-slate-500 whitespace-nowrap">${row.date}</td>
+                        <td class="py-3 px-3 font-bold text-xs text-slate-800">${row.category}</td>
+                        <td class="py-3 px-3 text-xs text-slate-600">${row.description}</td>
+                        <td class="py-3 px-3 text-right font-bold text-emerald-600">${row.cashIn > 0 ? '+' + formatPHP(row.cashIn) : '—'}</td>
+                        <td class="py-3 px-3 text-right font-bold text-rose-600">${row.cashOut > 0 ? '-' + formatPHP(row.cashOut) : '—'}</td>
+                        <td class="py-3 px-3 text-right font-extrabold ${row.runningBalance >= 0 ? 'text-slate-900' : 'text-rose-700'}">${formatPHP(row.runningBalance)}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // Render Chart.js Business Growth Chart
+            const sortedMonths = Object.keys(monthlyMap).sort();
+            const labels = sortedMonths.length > 0 ? sortedMonths : [getTodayStr().slice(0, 7)];
+            const cashInSeries = sortedMonths.length > 0 ? sortedMonths.map(m => monthlyMap[m].in) : [0];
+            const cashOutSeries = sortedMonths.length > 0 ? sortedMonths.map(m => monthlyMap[m].out) : [0];
+            const balanceSeries = sortedMonths.length > 0 ? sortedMonths.map(m => monthlyMap[m].endingBalance) : [0];
+
+            const ctx = document.getElementById('admin-cashflow-chart');
+            if (ctx && window.Chart) {
+                if (cashflowChartInstance) {
+                    cashflowChartInstance.destroy();
+                }
+                cashflowChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [
+                            {
+                                type: 'line',
+                                label: 'Business Cash Balance (Pagtaas ng Pera)',
+                                data: balanceSeries,
+                                borderColor: '#059669',
+                                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.35,
+                                pointRadius: 4,
+                                pointBackgroundColor: '#059669',
+                                yAxisID: 'y'
+                            },
+                            {
+                                type: 'bar',
+                                label: 'Cash In (Pumasok)',
+                                data: cashInSeries,
+                                backgroundColor: 'rgba(14, 165, 233, 0.75)',
+                                borderRadius: 6,
+                                yAxisID: 'y'
+                            },
+                            {
+                                type: 'bar',
+                                label: 'Cash Out (Lumabas)',
+                                data: cashOutSeries,
+                                backgroundColor: 'rgba(244, 63, 94, 0.75)',
+                                borderRadius: 6,
+                                yAxisID: 'y'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { font: { family: 'Inter', size: 11, weight: '600' } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => `${context.dataset.label}: ${formatPHP(context.parsed.y)}`
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: (val) => '₱' + Number(val).toLocaleString(),
+                                    font: { family: 'Inter', size: 11 }
+                                },
+                                grid: { color: '#f1f5f9' }
+                            },
+                            x: {
+                                ticks: { font: { family: 'Inter', size: 11 } },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        async function submitManualCashflow(e) {
+            e.preventDefault();
+            const entryType = document.getElementById('cf-entry-type').value;
+            const category = document.getElementById('cf-entry-category').value.trim();
+            const amount = Number(document.getElementById('cf-entry-amount').value);
+            const entryDate = document.getElementById('cf-entry-date').value || getTodayStr();
+            const description = document.getElementById('cf-entry-desc').value.trim();
+
+            if (amount <= 0) return showToast('Enter a valid amount.', 'error');
+
+            const { error } = await supabaseClient.from('business_cashflow').insert([{
+                entry_type: entryType,
+                category,
+                description,
+                amount,
+                entry_date: entryDate
+            }]);
+
+            if (error) return showToast(error.message, 'error');
+
+            e.target.reset();
+            document.getElementById('cf-entry-date').value = getTodayStr();
+            showToast('Business cashflow entry recorded!', 'success');
+            await renderActiveDashboard();
+        }
+
         function renderAdminDashboard(db) {
             document.getElementById('admin-dashboard').classList.remove('hidden');
+
+            const cfDateInput = document.getElementById('cf-entry-date');
+            if (cfDateInput && !cfDateInput.value) cfDateInput.value = getTodayStr();
 
             const totalSavings = db.profiles.reduce((sum, p) => sum + Number(p.savings_balance || 0), 0);
             const activeDisbursed = db.loans
@@ -2454,6 +3047,9 @@
             document.getElementById('admin-badge-loans').textContent = pendingLoansCount;
             document.getElementById('admin-badge-savings').textContent = pendingSavingsCount;
             document.getElementById('admin-badge-deposits').textContent = pendingDepositsCount;
+
+            // 0. Compute & Render Business Cashflow & Growth Chart
+            computeAndRenderAdminCashflow(db);
 
             // 1. Member Accounts Table
             const membersTbody = document.getElementById('admin-members-tbody');
@@ -2490,7 +3086,7 @@
                 `;
             }).join('');
 
-            // 2. Loans Management Table (With full Loan Application Form details)
+            // 2. Loans Management Table
             const loansTbody = document.getElementById('admin-loans-tbody');
             if (db.loans.length === 0) {
                 loansTbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 text-xs">No loan records found.</td></tr>`;
@@ -2585,26 +3181,36 @@
                 }).join('');
             }
 
-            // 4. Investor Deposits Table
+            // 4. Investor Deposits Table (with 1-Year Lock & Next 1% Auto-Payout)
             const depositsTbody = document.getElementById('admin-deposits-tbody');
             if (db.investments.length === 0) {
-                depositsTbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 text-xs">No investment deposit requests found.</td></tr>`;
+                depositsTbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 text-xs">No investment deposit requests found.</td></tr>`;
             } else {
-                depositsTbody.innerHTML = db.investments.map(dep => `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="py-3.5 px-3 font-bold text-slate-900">${dep.investor_name}</td>
-                        <td class="py-3.5 px-3 text-xs text-slate-500">${(dep.created_at || '').split('T')[0]}</td>
-                        <td class="py-3.5 px-3 font-mono text-xs text-slate-700">${dep.reference_no}</td>
-                        <td class="py-3.5 px-3 font-bold text-emerald-700">${formatPHP(dep.amount)}</td>
-                        <td class="py-3.5 px-3">${getStatusBadge(dep.status)}</td>
-                        <td class="py-3.5 px-3 text-right space-x-1">
-                            ${dep.status === 'pending' ? `
-                                <button onclick="approveInvestorDeposit('${dep.id}', 'approved')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">Approve & Credit</button>
-                                <button onclick="approveInvestorDeposit('${dep.id}', 'rejected')" class="px-2.5 py-1.5 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold">Reject</button>
-                            ` : `<span class="text-xs text-slate-400">Processed</span>`}
-                        </td>
-                    </tr>
-                `).join('');
+                depositsTbody.innerHTML = db.investments.map(dep => {
+                    const isApproved = dep.status === 'approved';
+                    const effDate = dep.effective_date || (dep.created_at || '').split('T')[0];
+                    const matDate = dep.maturity_date || addYearsToDateStr(effDate, 1);
+
+                    return `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="py-3.5 px-3 font-bold text-slate-900">${dep.investor_name}</td>
+                            <td class="py-3.5 px-3 text-xs">
+                                <div class="font-bold text-slate-700">${isApproved ? 'Eff: ' + effDate : 'Req: ' + effDate}</div>
+                                ${isApproved ? `<div class="text-[11px] text-amber-700 font-semibold">Unlock: ${matDate}</div>` : ''}
+                            </td>
+                            <td class="py-3.5 px-3 font-mono text-xs text-slate-700">${dep.reference_no}</td>
+                            <td class="py-3.5 px-3 font-bold text-emerald-700">${formatPHP(dep.amount)}</td>
+                            <td class="py-3.5 px-3 text-xs font-semibold text-sky-700">${isApproved ? (dep.next_payout_date || 'Scheduled') : 'Upon Approval'}</td>
+                            <td class="py-3.5 px-3">${getStatusBadge(dep.status)}</td>
+                            <td class="py-3.5 px-3 text-right space-x-1 whitespace-nowrap">
+                                ${dep.status === 'pending' ? `
+                                    <button onclick="approveInvestorDeposit('${dep.id}', 'approved')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">Approve & Lock 1 Yr</button>
+                                    <button onclick="approveInvestorDeposit('${dep.id}', 'rejected')" class="px-2.5 py-1.5 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold">Reject</button>
+                                ` : `<span class="text-xs text-slate-400">Active (1%/mo Auto)</span>`}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
             }
         }
 
@@ -2751,7 +3357,6 @@
             await renderActiveDashboard();
         }
 
-        // Admin Savings Deposit & Withdrawal Processor
         async function processSavingsTransaction(savingsId, newStatus) {
             const { data: sav, error: fetchErr } = await supabaseClient.from('savings_deposits').select('*').eq('id', savingsId).single();
             if (fetchErr || !sav) return showToast('Savings record not found.', 'error');
@@ -2779,8 +3384,8 @@
                     sav.user_id,
                     isWithdraw ? 'Savings Withdrawal Approved' : 'Savings Deposit Approved',
                     isWithdraw
-                        ? `Your savings withdrawal of ${formatPHP(sav.amount)} via ${sav.payment_method} has been approved and deducted from your Savings Balance.`
-                        : `Your ${sav.payment_method} deposit of ${formatPHP(sav.amount)} has been approved and added to your Savings Balance.`,
+                        ? `Your withdrawal of ${formatPHP(sav.amount)} via ${sav.payment_method} has been approved and released.`
+                        : `Your ${sav.payment_method} deposit of ${formatPHP(sav.amount)} has been approved and added to your Savings Wallet.`,
                     'savings'
                 );
             } else {
@@ -2808,8 +3413,8 @@
 
         async function creditMonthlySavingsInterestToAll() {
             const db = await fetchAllData();
-            const savers = db.profiles.filter(p => Number(p.savings_balance || 0) > 0);
-            if (savers.length === 0) return showToast('No members currently have a positive savings balance.', 'info');
+            const savers = db.profiles.filter(p => p.role === 'user' && Number(p.savings_balance || 0) > 0);
+            if (savers.length === 0) return showToast('No borrowers currently have a positive savings balance.', 'info');
 
             let count = 0;
             for (const member of savers) {
@@ -2839,11 +3444,10 @@
                 count++;
             }
 
-            showToast(`Credited 4% p.a. monthly interest to ${count} member(s)!`, 'success');
+            showToast(`Credited 4% p.a. monthly interest to ${count} borrower(s)!`, 'success');
             await renderActiveDashboard();
         }
 
-        // Admin Edit Member Modal
         async function openEditModal(memberId) {
             const db = await fetchAllData();
             const member = db.profiles.find(p => p.id === memberId);
@@ -2901,26 +3505,44 @@
             const { data: dep, error: fetchErr } = await supabaseClient.from('investments').select('*').eq('id', depositId).single();
             if (fetchErr || !dep) return showToast('Deposit record not found.', 'error');
 
-            const { error: updateErr } = await supabaseClient.from('investments').update({ status: newStatus }).eq('id', depositId);
-            if (updateErr) return showToast(updateErr.message, 'error');
-
             if (newStatus === 'approved') {
+                const effDate = getTodayStr();
+                const matDate = addYearsToDateStr(effDate, 1);
+                const nextPayout = advanceDueDateByFrequency(effDate, 'monthly');
+
+                const { error: updateErr } = await supabaseClient.from('investments').update({
+                    status: 'approved',
+                    effective_date: effDate,
+                    maturity_date: matDate,
+                    next_payout_date: nextPayout
+                }).eq('id', depositId);
+
+                if (updateErr) return showToast(updateErr.message, 'error');
+
                 const { data: invProfile } = await supabaseClient.from('profiles').select('invested_capital').eq('id', dep.investor_id).single();
                 const updatedCap = Number(invProfile?.invested_capital || 0) + Number(dep.amount);
                 await supabaseClient.from('profiles').update({ invested_capital: updatedCap }).eq('id', dep.investor_id);
 
-                await createNotification(dep.investor_id, 'Investment Deposit Approved', `Your capital deposit of ${formatPHP(dep.amount)} has been approved and credited.`, 'investment');
+                const monthlyYieldAmt = Number(dep.amount) * 0.01;
+                await createNotification(
+                    dep.investor_id,
+                    'Investment Approved (1-Yr Lock & Auto 1%/Mo)',
+                    `Your investment of ${formatPHP(dep.amount)} is now effective (${effDate}) and frozen for 1 year until ${matDate}. You will automatically receive 1% (${formatPHP(monthlyYieldAmt)}) in your Savings Wallet every month starting ${nextPayout}.`,
+                    'investment'
+                );
             } else {
+                const { error: updateErr } = await supabaseClient.from('investments').update({ status: 'rejected' }).eq('id', depositId);
+                if (updateErr) return showToast(updateErr.message, 'error');
                 await createNotification(dep.investor_id, 'Investment Deposit Rejected', `Your capital deposit request of ${formatPHP(dep.amount)} was rejected.`, 'investment');
             }
 
-            showToast(newStatus === 'approved' ? 'Deposit approved and credited.' : 'Deposit rejected.', 'success');
+            showToast(newStatus === 'approved' ? 'Investment approved! Locked for 1 year with auto 1%/mo yield.' : 'Investment rejected.', 'success');
             await renderActiveDashboard();
         }
 
         /**
          * ===================================================================
-         * 8. AUTO-RESTORE SESSION ON PAGE LOAD
+         * 9. AUTO-RESTORE SESSION ON PAGE LOAD
          * ===================================================================
          */
         window.addEventListener('DOMContentLoaded', async () => {
