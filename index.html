@@ -1,301 +1,1577 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PeraAgad - Microfinance Dashboard</title>
+    <title>BayanFund — Lending & Investment Portal</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Supabase JS Client SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #f8fafc;
         }
-        .custom-scrollbar::-webkit-scrollbar {
+        ::-webkit-scrollbar {
+            width: 6px;
             height: 6px;
         }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1; 
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 4px;
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
     </style>
 </head>
-<body class="text-gray-800 antialiased min-h-screen flex flex-col">
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <nav class="bg-blue-700 text-white shadow-md">
+    <!-- =====================================================================
+         TOAST NOTIFICATION CONTAINER
+    ====================================================================== -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <!-- =====================================================================
+         TOP NAVIGATION BAR
+    ====================================================================== -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0 flex items-center gap-2">
-                        <i class="fa-solid fa-wallet text-2xl text-yellow-400"></i>
-                        <span class="font-bold text-xl tracking-wide">PeraAgad</span>
+            <div class="flex justify-between items-center h-16">
+                <!-- Brand Logo -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center text-white shadow-md">
+                        <i class="fa-solid fa-hand-holding-dollar text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-lg tracking-tight text-slate-900">Bayan<span class="text-emerald-600">Fund</span></span>
+                        <p class="text-[11px] font-medium text-slate-400 leading-none">Community Finance Portal</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <div class="text-sm hidden sm:block text-right">
-                        <p class="font-medium">Gilbert S. Aniel</p>
-                        <p class="text-blue-200 text-xs">Standard Member</p>
+
+                <!-- Authenticated User Profile & Sign Out -->
+                <div id="nav-user-controls" class="hidden items-center gap-3">
+                    <div class="hidden sm:flex flex-col text-right">
+                        <span id="nav-user-name" class="text-sm font-bold text-slate-800 leading-tight">Member Name</span>
+                        <span id="nav-user-role" class="text-[11px] font-semibold uppercase tracking-wider text-emerald-600">Borrower</span>
                     </div>
-                    <!-- Pinalitan ang icon ng ID/Profile Picture -->
-                    <img src="eve.jpg" alt="Borrower ID Picture" class="h-10 w-10 rounded-full border-2 border-white cursor-pointer object-cover shadow-sm">
+                    <button onclick="logout()" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl transition">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Sign Out</span>
+                    </button>
                 </div>
             </div>
         </div>
-    </nav>
+    </header>
 
-    <!-- Main Content -->
-    <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <!-- Credit Summary Section with 4 Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <!-- Total Limit -->
-            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 flex items-center justify-between transition hover:shadow-md">
-                <div>
-                    <p class="text-sm text-gray-500 font-medium mb-1">Total Limit</p>
-                    <h2 class="text-2xl font-bold text-gray-800">₱20,000</h2>
-                </div>
-                <div class="h-12 w-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-600">
-                    <i class="fa-solid fa-credit-card text-xl"></i>
-                </div>
-            </div>
+    <!-- =====================================================================
+         MAIN CONTENT AREA
+    ====================================================================== -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col justify-center">
 
-            <!-- Current Loan -->
-            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 flex items-center justify-between transition hover:shadow-md">
-                <div>
-                    <p class="text-sm text-gray-500 font-medium mb-1">Current Loan</p>
-                    <h2 class="text-2xl font-bold text-red-600">₱5,000</h2>
-                    <p class="text-xs text-red-500 mt-2 flex items-center gap-1">
-                        Active Balance
-                    </p>
-                </div>
-                <div class="h-12 w-12 rounded-full bg-red-50 flex items-center justify-center text-red-600">
-                    <i class="fa-solid fa-file-invoice-dollar text-xl"></i>
-                </div>
-            </div>
-
-            <!-- Available Credit -->
-            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 flex items-center justify-between transition hover:shadow-md border-l-4 border-l-green-500">
-                <div>
-                    <p class="text-sm text-gray-500 font-medium mb-1">Available Credit</p>
-                    <h2 class="text-2xl font-bold text-green-600">₱15,000</h2>
-                    <p class="text-xs text-green-600 mt-2 flex items-center gap-1">
-                        <i class="fa-solid fa-circle-check"></i> Ready to borrow
-                    </p>
-                </div>
-                <div class="h-12 w-12 rounded-full bg-green-50 flex items-center justify-center text-green-600">
-                    <i class="fa-solid fa-wallet text-xl"></i>
-                </div>
-            </div>
-
-            <!-- Credit Score Card -->
-            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 flex items-center justify-between transition hover:shadow-md">
-                <div>
-                    <p class="text-sm text-gray-500 font-medium mb-1">Credit Score</p>
-                    <div class="flex items-baseline gap-2">
-                        <h2 class="text-2xl font-bold text-gray-800">800</h2>
-                        <span class="text-sm font-medium text-green-500">Excellent</span>
+        <!-- =================================================================
+             1. CLEAN PRODUCTION AUTHENTICATION SCREEN
+        ================================================================== -->
+        <section id="auth-screen" class="max-w-md w-full mx-auto">
+            <div class="bg-white rounded-3xl p-7 sm:p-9 border border-slate-200 shadow-lg shadow-slate-200/50">
+                <!-- Header -->
+                <div class="text-center mb-7">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3 text-xl border border-emerald-100">
+                        <i class="fa-solid fa-shield-halved"></i>
                     </div>
-                    <p class="text-xs text-gray-400 mt-2">Last updated today</p>
+                    <h1 id="auth-heading" class="text-2xl font-extrabold text-slate-900 tracking-tight">Welcome Back</h1>
+                    <p id="auth-subheading" class="text-xs sm:text-sm text-slate-500 mt-1">Sign in using your registered email address and password.</p>
                 </div>
-                <div class="relative h-12 w-12">
-                    <svg class="w-full h-full transform -rotate-90">
-                        <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="4" fill="transparent" class="text-gray-200"></circle>
-                        <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="4" fill="transparent" stroke-dasharray="125" stroke-dashoffset="25" class="text-green-500"></circle>
-                    </svg>
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <i class="fa-solid fa-star text-yellow-400 text-sm"></i>
+
+                <!-- Inline Configuration / Auth Alert -->
+                <div id="auth-inline-alert" class="hidden mb-5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium leading-relaxed"></div>
+
+                <!-- Sign In Form -->
+                <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label for="login-email" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Email Address</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-envelope absolute left-3.5 top-3.5 text-slate-400"></i>
+                            <input type="email" id="login-email" required placeholder="name@example.com" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="login-password" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Password</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400"></i>
+                            <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm transition">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="login-submit-btn" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+                        <span>Sign In</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                    <div class="pt-4 border-t border-slate-100 text-center space-y-2">
+                        <p class="text-xs text-slate-400">Sign in using your registered email address and password.</p>
+                        <p class="text-xs text-slate-600">
+                            Don't have an account yet?
+                            <button type="button" onclick="switchAuthMode('register')" class="font-bold text-emerald-600 hover:text-emerald-700 hover:underline ml-1">Create Account</button>
+                        </p>
+                    </div>
+                </form>
+
+                <!-- Register Form -->
+                <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                    <div>
+                        <label for="reg-name" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Full Name</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-user absolute left-3.5 top-3.5 text-slate-400"></i>
+                            <input type="text" id="reg-name" required placeholder="John Doe" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="reg-email" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Email Address</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-envelope absolute left-3.5 top-3.5 text-slate-400"></i>
+                            <input type="email" id="reg-email" required placeholder="name@example.com" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="reg-password" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Password</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400"></i>
+                            <input type="password" id="reg-password" required minlength="6" placeholder="Minimum 6 characters" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm transition">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="register-submit-btn" class="w-full py-3.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-md transition">
+                        Create Account
+                    </button>
+
+                    <div class="pt-4 border-t border-slate-100 text-center">
+                        <p class="text-xs text-slate-600">
+                            Already have an account?
+                            <button type="button" onclick="switchAuthMode('login')" class="font-bold text-emerald-600 hover:text-emerald-700 hover:underline ml-1">Sign In</button>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             2. BORROWER (USER) DASHBOARD
+        ================================================================== -->
+        <section id="user-dashboard" class="hidden space-y-6 w-full self-start">
+            <!-- Welcome Header -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-800 mb-2">
+                        <i class="fa-solid fa-user-check"></i> Borrower Portal
+                    </span>
+                    <h2 class="text-2xl font-extrabold text-slate-900">Welcome, <span id="user-welcome-name">Borrower</span></h2>
+                    <p class="text-sm text-slate-500">Overview of your credit limit, upcoming due dates, and savings balance.</p>
+                </div>
+                <div class="flex items-center gap-3 bg-slate-50 px-4 py-3 rounded-2xl border border-slate-200">
+                    <div class="text-right">
+                        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Credit Score</div>
+                        <div id="user-credit-score" class="text-2xl font-black text-emerald-600">650</div>
+                    </div>
+                    <div id="user-credit-badge" class="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-100 text-emerald-800">
+                        Good Standing
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <!-- Loan Calculator Section -->
-            <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="bg-blue-600 px-6 py-4">
-                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-calculator"></i> Loan Calculator
-                    </h3>
-                    <p class="text-blue-100 text-xs mt-1">Calculate your loan (5% Interest)</p>
+            <!-- Key Financial Metrics Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Available Loan Limit -->
+                <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-3xl p-5 shadow-md">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-100">Available Loan Limit</span>
+                        <div class="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
+                            <i class="fa-solid fa-wallet"></i>
+                        </div>
+                    </div>
+                    <div id="user-available-limit" class="text-2xl sm:text-3xl font-extrabold tracking-tight">₱0.00</div>
+                    <div class="text-xs text-emerald-100 mt-1">Maximum Limit: <span id="user-max-limit" class="font-semibold">₱0.00</span></div>
                 </div>
-                
-                <div class="p-6">
-                    <form id="loanForm" class="space-y-5" onsubmit="return false;">
+
+                <!-- Active Loan Balance -->
+                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Active Loan Balance</span>
+                        <div class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                            <i class="fa-solid fa-file-invoice-dollar"></i>
+                        </div>
+                    </div>
+                    <div id="user-active-balance" class="text-2xl sm:text-3xl font-extrabold text-slate-900">₱0.00</div>
+                    <div class="text-xs text-slate-500 mt-1">Principal plus accrued interest</div>
+                </div>
+
+                <!-- Next Due Date -->
+                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Next Due Date</span>
+                        <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                            <i class="fa-solid fa-calendar-day"></i>
+                        </div>
+                    </div>
+                    <div id="user-due-date" class="text-xl sm:text-2xl font-extrabold text-amber-600">No Active Due</div>
+                    <div id="user-due-status" class="text-xs text-slate-500 mt-1">Zero active loan balance</div>
+                </div>
+
+                <!-- Savings Balance -->
+                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Savings Balance</span>
+                        <div class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
+                            <i class="fa-solid fa-piggy-bank"></i>
+                        </div>
+                    </div>
+                    <div id="user-savings" class="text-2xl sm:text-3xl font-extrabold text-slate-900">₱0.00</div>
+                    <div class="text-xs text-slate-500 mt-1">Verified member savings</div>
+                </div>
+            </div>
+
+            <!-- Loan Application & Loan History Split -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Apply for a Loan Card -->
+                <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </div>
                         <div>
-                            <label for="loanAmount" class="block text-sm font-medium text-gray-700 mb-1">Loan Amount</label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <span class="text-gray-500 font-medium">₱</span>
-                                </div>
-                                <input type="number" id="loanAmount" min="500" max="15000" step="100" class="pl-8 w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Example: 5000">
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">Max: ₱15,000 based on Available Credit</p>
+                            <h3 class="font-bold text-lg text-slate-900">Apply for a Loan</h3>
+                            <p class="text-xs text-slate-500">5% monthly interest • Fast approval</p>
+                        </div>
+                    </div>
+
+                    <form onsubmit="submitLoanApplication(event, 'user')" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Loan Amount (₱)</label>
+                            <input type="number" id="user-loan-amount" min="500" step="100" required oninput="calculateLoanPreview('user')" placeholder="5000" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none font-bold text-slate-900">
+                            <p class="text-[11px] text-slate-400 mt-1">Available limit: <span id="user-form-limit-hint" class="font-bold text-emerald-600">₱0.00</span></p>
                         </div>
 
                         <div>
-                            <label for="termType" class="block text-sm font-medium text-gray-700 mb-1">Payment Frequency</label>
-                            <select id="termType" class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                                <option value="daily">Daily</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="biweekly">Bi-weekly</option>
-                                <option value="monthly" selected>Monthly</option>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Payment Term</label>
+                            <select id="user-loan-term" onchange="calculateLoanPreview('user')" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-medium bg-white">
+                                <option value="1">1 Month (5% Interest)</option>
+                                <option value="2">2 Months (10% Total Interest)</option>
+                                <option value="3" selected>3 Months (15% Total Interest)</option>
+                                <option value="6">6 Months (30% Total Interest)</option>
                             </select>
                         </div>
 
                         <div>
-                            <label for="loanTerm" class="block text-sm font-medium text-gray-700 mb-1">Number of Terms</label>
-                            <div class="relative">
-                                <input type="number" id="loanTerm" min="1" class="w-full rounded-lg border border-gray-300 px-4 py-2.5 pr-20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Example: 6">
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <span id="termLabel" class="text-gray-500 text-sm">Months</span>
-                                </div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Loan Purpose</label>
+                            <input type="text" id="user-loan-purpose" required placeholder="e.g., Store inventory expansion" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm">
+                        </div>
+
+                        <!-- Auto-Computation Box -->
+                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-2 text-xs">
+                            <div class="flex justify-between text-slate-600">
+                                <span>Principal Amount:</span>
+                                <span id="user-calc-principal" class="font-bold">₱0.00</span>
+                            </div>
+                            <div class="flex justify-between text-slate-600">
+                                <span>Estimated Interest (5%/mo):</span>
+                                <span id="user-calc-interest" class="font-bold text-amber-600">₱0.00</span>
+                            </div>
+                            <div class="pt-2 border-t border-slate-200 flex justify-between text-sm font-extrabold text-slate-900">
+                                <span>Total Payable:</span>
+                                <span id="user-calc-total" class="text-emerald-600">₱0.00</span>
                             </div>
                         </div>
 
-                        <!-- Results Area -->
-                        <div class="bg-gray-50 rounded-xl p-4 mt-6 border border-gray-100">
-                            <div class="bg-blue-50 rounded-lg p-3 border border-blue-100">
-                                <span id="amortLabel" class="block text-xs text-blue-600 font-medium mb-1">Monthly Amortization</span>
-                                <span id="resAmort" class="block text-2xl font-bold text-blue-700">₱0.00</span>
-                            </div>
-                        </div>
+                        <button type="submit" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md shadow-emerald-600/20 transition">
+                            Submit Loan Application
+                        </button>
                     </form>
+                </div>
+
+                <!-- Loan History & Status Table -->
+                <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-900">Loan History</h3>
+                            <p class="text-xs text-slate-500">Track the status and due dates of your loan applications</p>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto flex-grow">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                    <th class="py-3 px-2">Date / Purpose</th>
+                                    <th class="py-3 px-2">Principal</th>
+                                    <th class="py-3 px-2">Total Payable</th>
+                                    <th class="py-3 px-2">Due Date</th>
+                                    <th class="py-3 px-2 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-loans-tbody" class="divide-y divide-slate-100 text-sm">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             3. INVESTOR DASHBOARD (Portfolio Growth + Dual Loan Capability)
+        ================================================================== -->
+        <section id="investor-dashboard" class="hidden space-y-6 w-full self-start">
+            <!-- Investor Header -->
+            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 text-white rounded-3xl p-6 sm:p-8 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-2">
+                        <i class="fa-solid fa-gem"></i> Verified Investor
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold">Welcome, <span id="inv-welcome-name">Investor</span></h2>
+                    <p class="text-sm text-slate-300 mt-1">Monitor your invested capital growth, accrued profits, and personal credit facility.</p>
+                </div>
+                <div class="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-3 rounded-2xl border border-white/10">
+                    <div class="text-right">
+                        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-300">Credit Score</div>
+                        <div id="inv-credit-score" class="text-2xl font-black text-emerald-400">750</div>
+                    </div>
+                    <div class="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300">
+                        Priority Tier
+                    </div>
                 </div>
             </div>
 
-            <!-- Payment History Section -->
-            <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-                <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                    <div>
-                        <h3 class="text-lg font-bold text-gray-800">Payment History</h3>
-                        <p class="text-sm text-gray-500">Recent Transactions</p>
+            <!-- Investor Portfolio & Loan Metrics -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Total Invested Capital -->
+                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Invested Capital</span>
+                        <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                            <i class="fa-solid fa-sack-dollar"></i>
+                        </div>
                     </div>
-                    <button class="text-sm text-blue-600 font-medium hover:text-blue-800 transition">View All</button>
+                    <div id="inv-capital" class="text-2xl sm:text-3xl font-extrabold text-slate-900">₱0.00</div>
+                    <div class="text-xs text-emerald-600 font-semibold mt-1">Active Lending Pool Share</div>
                 </div>
-                
-                <div class="overflow-x-auto custom-scrollbar flex-1 p-2">
+
+                <!-- Accrued Earnings (Profit) -->
+                <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-3xl p-5 shadow-md">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-100">Accrued Earnings (Profit)</span>
+                        <div class="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
+                            <i class="fa-solid fa-arrow-trend-up"></i>
+                        </div>
+                    </div>
+                    <div id="inv-earnings" class="text-2xl sm:text-3xl font-extrabold">₱0.00</div>
+                    <div class="text-xs text-emerald-100 mt-1">Cumulative dividend yield</div>
+                </div>
+
+                <!-- Total Portfolio Value -->
+                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Portfolio Value</span>
+                        <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
+                    </div>
+                    <div id="inv-total-value" class="text-2xl sm:text-3xl font-extrabold text-indigo-600">₱0.00</div>
+                    <div class="text-xs text-slate-500 mt-1">Capital + Accrued Profit</div>
+                </div>
+
+                <!-- Investor's Personal Loan Limit -->
+                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Available Loan Limit</span>
+                        <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                            <i class="fa-solid fa-hand-holding-heart"></i>
+                        </div>
+                    </div>
+                    <div id="inv-available-limit" class="text-2xl sm:text-3xl font-extrabold text-slate-900">₱0.00</div>
+                    <div class="text-xs text-slate-500 mt-1">Active Loan: <span id="inv-active-balance" class="font-bold text-rose-600">₱0.00</span></div>
+                </div>
+            </div>
+
+            <!-- Investor Sub-Navigation Tabs -->
+            <div class="flex flex-wrap gap-2 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+                <button id="inv-tab-portfolio" onclick="switchInvestorTab('portfolio')" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold bg-emerald-600 text-white shadow-sm transition">
+                    <i class="fa-solid fa-coins mr-1.5"></i> Investment Portfolio
+                </button>
+                <button id="inv-tab-loan" onclick="switchInvestorTab('loan')" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-hand-holding-dollar mr-1.5"></i> My Loans
+                </button>
+            </div>
+
+            <!-- TAB A: INVESTMENT GROWTH & ADD CAPITAL -->
+            <div id="inv-panel-portfolio" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Add Capital Form -->
+                <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-lg text-slate-900 mb-1">New Capital Deposit</h3>
+                    <p class="text-xs text-slate-500 mb-4">Submit your deposit reference for administrator verification.</p>
+
+                    <form onsubmit="submitInvestmentDeposit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Deposit Amount (₱)</label>
+                            <input type="number" id="inv-deposit-amount" min="1000" step="500" required placeholder="10000" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none font-bold text-slate-900">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Payment Method & Reference No.</label>
+                            <input type="text" id="inv-deposit-ref" required placeholder="e.g., GCash Ref #123456789" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm">
+                        </div>
+
+                        <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100 text-xs text-emerald-900 space-y-1">
+                            <div class="font-bold"><i class="fa-solid fa-circle-info mr-1"></i> Profit Distribution</div>
+                            <p>Once verified by the administrator, your capital is added to the active lending pool and accrues monthly dividend returns.</p>
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition">
+                            Submit Deposit Request
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Investment History Table -->
+                <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-lg text-slate-900 mb-1">Investment History</h3>
+                    <p class="text-xs text-slate-500 mb-4">Record of your capital deposits and verification status</p>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                    <th class="py-3 px-2">Date</th>
+                                    <th class="py-3 px-2">Reference No.</th>
+                                    <th class="py-3 px-2">Amount</th>
+                                    <th class="py-3 px-2 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inv-deposits-tbody" class="divide-y divide-slate-100 text-sm">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB B: INVESTOR LOAN APPLICATION PANEL -->
+            <div id="inv-panel-loan" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-lg text-slate-900 mb-1">Apply for a Loan</h3>
+                    <p class="text-xs text-slate-500 mb-4">Borrow against your available Investor Credit Limit.</p>
+
+                    <form onsubmit="submitLoanApplication(event, 'investor')" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Loan Amount (₱)</label>
+                            <input type="number" id="inv-loan-amount" min="500" step="100" required oninput="calculateLoanPreview('investor')" placeholder="10000" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none font-bold text-slate-900">
+                            <p class="text-[11px] text-slate-400 mt-1">Available limit: <span id="inv-form-limit-hint" class="font-bold text-emerald-600">₱0.00</span></p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Payment Term</label>
+                            <select id="inv-loan-term" onchange="calculateLoanPreview('investor')" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-medium bg-white">
+                                <option value="1">1 Month (5% Interest)</option>
+                                <option value="3" selected>3 Months (15% Total Interest)</option>
+                                <option value="6">6 Months (30% Total Interest)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Loan Purpose</label>
+                            <input type="text" id="inv-loan-purpose" required placeholder="e.g., Business working capital" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm">
+                        </div>
+
+                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-2 text-xs">
+                            <div class="flex justify-between text-slate-600">
+                                <span>Principal Amount:</span>
+                                <span id="inv-calc-principal" class="font-bold">₱0.00</span>
+                            </div>
+                            <div class="flex justify-between text-slate-600">
+                                <span>Estimated Interest (5%/mo):</span>
+                                <span id="inv-calc-interest" class="font-bold text-amber-600">₱0.00</span>
+                            </div>
+                            <div class="pt-2 border-t border-slate-200 flex justify-between text-sm font-extrabold text-slate-900">
+                                <span>Total Payable:</span>
+                                <span id="inv-calc-total" class="text-emerald-600">₱0.00</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-md transition">
+                            Submit Loan Application
+                        </button>
+                    </form>
+                </div>
+
+                <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-lg text-slate-900 mb-1">Personal Loan History</h3>
+                    <p class="text-xs text-slate-500 mb-4">Due dates and approval status of your personal loans</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                    <th class="py-3 px-2">Date / Purpose</th>
+                                    <th class="py-3 px-2">Principal</th>
+                                    <th class="py-3 px-2">Total Payable</th>
+                                    <th class="py-3 px-2">Due Date</th>
+                                    <th class="py-3 px-2 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inv-loans-tbody" class="divide-y divide-slate-100 text-sm">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             4. ADMIN CONTROL CENTER
+        ================================================================== -->
+        <section id="admin-dashboard" class="hidden space-y-6 w-full self-start">
+            <!-- Admin Top Banner -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 mb-2">
+                        <i class="fa-solid fa-shield-halved"></i> Administrator Access
+                    </span>
+                    <h2 class="text-2xl font-extrabold text-slate-900">Admin Control Center</h2>
+                    <p class="text-sm text-slate-500">Manage member credit limits, savings, investor earnings, and approve pending requests.</p>
+                </div>
+            </div>
+
+            <!-- Admin Summary Metrics -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Total Users</div>
+                    <div id="admin-kpi-members" class="text-2xl font-extrabold text-indigo-600">0</div>
+                    <div class="text-xs text-slate-500 mt-1">Registered borrowers & investors</div>
+                </div>
+                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Active Loans</div>
+                    <div id="admin-kpi-disbursed" class="text-2xl font-extrabold text-slate-900">₱0.00</div>
+                    <div class="text-xs text-slate-500 mt-1">Total approved principal disbursed</div>
+                </div>
+                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Total Invested Capital</div>
+                    <div id="admin-kpi-pool" class="text-2xl font-extrabold text-emerald-600">₱0.00</div>
+                    <div class="text-xs text-slate-500 mt-1">Combined investor pool capital</div>
+                </div>
+                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Pending Approvals</div>
+                    <div id="admin-kpi-pending-total" class="text-2xl font-extrabold text-amber-600">0</div>
+                    <div class="text-xs text-slate-500 mt-1">Loans & deposits awaiting review</div>
+                </div>
+            </div>
+
+            <!-- Admin Management Tabs -->
+            <div class="flex flex-wrap gap-2 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+                <button id="admin-tab-members" onclick="switchAdminTab('members')" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-900 text-white shadow-sm transition">
+                    <i class="fa-solid fa-users-gear mr-1.5"></i> Member Accounts
+                </button>
+                <button id="admin-tab-loans" onclick="switchAdminTab('loans')" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-file-signature mr-1.5"></i> Loan Applications (<span id="admin-badge-loans">0</span>)
+                </button>
+                <button id="admin-tab-deposits" onclick="switchAdminTab('deposits')" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-money-bill-transfer mr-1.5"></i> Investment Deposits (<span id="admin-badge-deposits">0</span>)
+                </button>
+            </div>
+
+            <!-- ADMIN PANEL 1: MEMBER ACCOUNTS TABLE -->
+            <div id="admin-panel-members" class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                <div class="mb-4">
+                    <h3 class="font-bold text-lg text-slate-900">Member Accounts Directory</h3>
+                    <p class="text-xs text-slate-500">Click <strong>Edit Account</strong> to update role, credit score, loan limit, savings, invested capital, or accrued profit.</p>
+                </div>
+
+                <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr>
-                                <th class="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">Date</th>
-                                <th class="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">Description</th>
-                                <th class="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">Amount</th>
-                                <th class="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">Status</th>
+                            <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                <th class="py-3 px-3">Member & Role</th>
+                                <th class="py-3 px-3">Credit Score</th>
+                                <th class="py-3 px-3">Max Loan Limit</th>
+                                <th class="py-3 px-3">Savings</th>
+                                <th class="py-3 px-3">Invested Capital</th>
+                                <th class="py-3 px-3">Accrued Profit</th>
+                                <th class="py-3 px-3 text-right">Action</th>
                             </tr>
                         </thead>
-                        <!--<tbody class="divide-y divide-gray-50 text-sm">
-                            <tr class="hover:bg-gray-50 transition">
-                                <td class="py-3 px-4 text-gray-600">Oct 05, 2026</td>
-                                <td class="py-3 px-4">
-                                    <p class="font-medium text-gray-800">Monthly Amortization</p>
-                                    <p class="text-xs text-gray-400">Loan Ref: #LN-8821</p>
-                                </td>
-                                <td class="py-3 px-4 font-medium text-gray-800">₱1,250.00</td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-medium bg-yellow-100 text-green-700 border border-green-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
-                                        Pending
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-gray-50 transition">
-                                <td class="py-3 px-4 text-gray-600">Sep 05, 2026</td>
-                                <td class="py-3 px-4">
-                                    <p class="font-medium text-gray-800">Monthly Amortization</p>
-                                    <p class="text-xs text-gray-400">Loan Ref: #LN-8821</p>
-                                </td>
-                                <td class="py-3 px-4 font-medium text-gray-800">₱1,250.00</td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                        Paid
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>-->
+                        <tbody id="admin-members-tbody" class="divide-y divide-slate-100 text-sm">
+                            <!-- Populated via JS -->
+                        </tbody>
                     </table>
                 </div>
             </div>
-            
-        </div>
+
+            <!-- ADMIN PANEL 2: LOAN APPROVAL QUEUE -->
+            <div id="admin-panel-loans" class="hidden bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-lg text-slate-900 mb-1">Loan Applications</h3>
+                <p class="text-xs text-slate-500 mb-4">Approve or reject pending loan requests, or mark active loans as paid.</p>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                <th class="py-3 px-3">Applicant</th>
+                                <th class="py-3 px-3">Purpose & Term</th>
+                                <th class="py-3 px-3">Principal</th>
+                                <th class="py-3 px-3">Total Payable</th>
+                                <th class="py-3 px-3">Due Date</th>
+                                <th class="py-3 px-3">Status</th>
+                                <th class="py-3 px-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-loans-tbody" class="divide-y divide-slate-100 text-sm">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ADMIN PANEL 3: INVESTOR DEPOSIT APPROVALS -->
+            <div id="admin-panel-deposits" class="hidden bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-lg text-slate-900 mb-1">Investment Deposits</h3>
+                <p class="text-xs text-slate-500 mb-4">Approving a deposit automatically credits the amount to the investor's Invested Capital.</p>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                <th class="py-3 px-3">Investor</th>
+                                <th class="py-3 px-3">Date</th>
+                                <th class="py-3 px-3">Reference No.</th>
+                                <th class="py-3 px-3">Amount</th>
+                                <th class="py-3 px-3">Status</th>
+                                <th class="py-3 px-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-deposits-tbody" class="divide-y divide-slate-100 text-sm">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
     </main>
 
+    <!-- =====================================================================
+         ADMIN EDIT MEMBER MODAL
+    ====================================================================== -->
+    <div id="edit-member-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-xl font-extrabold text-slate-900">Edit Member Account</h3>
+                    <p id="edit-modal-subtitle" class="text-xs text-slate-500">Member Details</p>
+                </div>
+                <button onclick="closeEditModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="saveMemberUpdates(event)" class="space-y-4">
+                <input type="hidden" id="edit-member-id">
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Credit Score (300–850)</label>
+                        <input type="number" id="edit-credit-score" min="300" max="850" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Max Loan Limit (₱)</label>
+                        <input type="number" id="edit-loan-limit" min="0" step="500" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none font-bold">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Savings Balance (₱)</label>
+                        <input type="number" id="edit-savings" min="0" step="100" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Account Role</label>
+                        <select id="edit-role" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm font-semibold bg-white">
+                            <option value="user">Borrower (User)</option>
+                            <option value="investor">Investor</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Investor Portfolio Controls -->
+                <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-3">
+                    <div class="text-xs font-bold uppercase tracking-wider text-emerald-800">
+                        <i class="fa-solid fa-chart-line mr-1"></i> Investor Portfolio Settings
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Invested Capital (₱)</label>
+                            <input type="number" id="edit-invested-capital" min="0" step="500" required class="w-full px-3.5 py-2 rounded-xl border border-emerald-200 bg-white focus:border-emerald-500 outline-none font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Accrued Earnings / Profit (₱)</label>
+                            <input type="number" id="edit-accrued-earnings" min="0" step="50" required class="w-full px-3.5 py-2 rounded-xl border border-emerald-200 bg-white focus:border-emerald-500 outline-none font-bold text-emerald-700">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         FOOTER
+    ====================================================================== -->
+    <footer class="bg-white border-t border-slate-200 py-5 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
+            <div>&copy; 2026 <strong class="text-slate-600">BayanFund</strong>. All rights reserved.</div>
+            <div>Secure Community Lending & Investment Platform</div>
+        </div>
+    </footer>
+
+    <!-- =====================================================================
+         APPLICATION LOGIC (SUPABASE PRODUCTION ENGINE)
+    ====================================================================== -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const loanAmountInput = document.getElementById('loanAmount');
-            const loanTermInput = document.getElementById('loanTerm');
-            const termTypeSelect = document.getElementById('termType');
-            
-            const resAmort = document.getElementById('resAmort');
-            const termLabel = document.getElementById('termLabel');
-            const amortLabel = document.getElementById('amortLabel');
+        /**
+         * ===================================================================
+         * 1. SUPABASE CONFIGURATION
+         * Replace SUPABASE_URL and SUPABASE_ANON_KEY with your project's API
+         * credentials from Supabase Dashboard -> Project Settings -> API.
+         *
+         * -------------------------------------------------------------------
+         * REQUIRED SUPABASE SQL SCHEMA (Run in Supabase SQL Editor):
+         * -------------------------------------------------------------------
+         * create table public.profiles (
+         *   id uuid references auth.users on delete cascade primary key,
+         *   full_name text not null,
+         *   email text not null,
+         *   role text not null default 'user' check (role in ('user', 'investor', 'admin')),
+         *   credit_score integer not null default 650,
+         *   loan_limit numeric not null default 5000,
+         *   savings_balance numeric not null default 0,
+         *   invested_capital numeric not null default 0,
+         *   accrued_earnings numeric not null default 0,
+         *   created_at timestamp with time zone default timezone('utc'::text, now()) not null
+         * );
+         *
+         * create table public.loans (
+         *   id uuid default gen_random_uuid() primary key,
+         *   user_id uuid references public.profiles(id) on delete cascade not null,
+         *   applicant_name text not null,
+         *   applicant_role text not null,
+         *   amount numeric not null,
+         *   term_months integer not null,
+         *   interest_amount numeric not null,
+         *   total_due numeric not null,
+         *   purpose text,
+         *   due_date date,
+         *   status text not null default 'pending' check (status in ('pending', 'approved', 'paid', 'rejected')),
+         *   created_at timestamp with time zone default timezone('utc'::text, now()) not null
+         * );
+         *
+         * create table public.investments (
+         *   id uuid default gen_random_uuid() primary key,
+         *   investor_id uuid references public.profiles(id) on delete cascade not null,
+         *   investor_name text not null,
+         *   amount numeric not null,
+         *   reference_no text not null,
+         *   status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
+         *   created_at timestamp with time zone default timezone('utc'::text, now()) not null
+         * );
+         *
+         * alter table public.profiles enable row level security;
+         * alter table public.loans enable row level security;
+         * alter table public.investments enable row level security;
+         *
+         * create policy "Authenticated read profiles" on public.profiles for select using (auth.role() = 'authenticated');
+         * create policy "Users insert own profile" on public.profiles for insert with check (auth.uid() = id);
+         * create policy "Authenticated update profiles" on public.profiles for update using (auth.role() = 'authenticated');
+         * create policy "Authenticated read loans" on public.loans for select using (auth.role() = 'authenticated');
+         * create policy "Authenticated insert loans" on public.loans for insert with check (auth.role() = 'authenticated');
+         * create policy "Authenticated update loans" on public.loans for update using (auth.role() = 'authenticated');
+         * create policy "Authenticated read investments" on public.investments for select using (auth.role() = 'authenticated');
+         * create policy "Authenticated insert investments" on public.investments for insert with check (auth.role() = 'authenticated');
+         * create policy "Authenticated update investments" on public.investments for update using (auth.role() = 'authenticated');
+         * ===================================================================
+         */
+        const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_PUBLIC_KEY';
 
-            const INTEREST_RATE = 0.05; // 5% base rate
+        const isSupabaseConfigured =
+            SUPABASE_URL !== 'YOUR_SUPABASE_PROJECT_URL' &&
+            SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_PUBLIC_KEY' &&
+            SUPABASE_URL.startsWith('http');
 
-            // Formatting number to PHP currency
-            const formatCurrency = (amount) => {
-                return new Intl.NumberFormat('en-PH', {
-                    style: 'currency',
-                    currency: 'PHP',
-                    minimumFractionDigits: 2
-                }).format(amount);
+        const supabaseClient = (isSupabaseConfigured && window.supabase)
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            : null;
+
+        let currentUser = null;
+
+        /**
+         * ===================================================================
+         * 2. FORMATTING & UI HELPERS
+         * ===================================================================
+         */
+        function formatPHP(amount) {
+            return '₱' + Number(amount || 0).toLocaleString('en-PH', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-emerald-600 text-white',
+                error: 'bg-rose-600 text-white',
+                info: 'bg-slate-800 text-white'
             };
+            const icons = {
+                success: 'fa-circle-check',
+                error: 'fa-circle-exclamation',
+                info: 'fa-circle-info'
+            };
+            toast.className = `${colors[type] || colors.info} px-4 py-3 rounded-2xl shadow-lg flex items-center gap-3 text-xs sm:text-sm font-semibold pointer-events-auto transition-all duration-300`;
+            toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info} text-base"></i><span>${message}</span>`;
+            container.appendChild(toast);
 
-            // Calculate Loan Function
-            const calculateLoan = () => {
-                const principal = parseFloat(loanAmountInput.value) || 0;
-                const termCount = parseInt(loanTermInput.value) || 0;
-                const termType = termTypeSelect.value;
-                
-                if (termType === 'daily') {
-                    termLabel.textContent = 'Days';
-                    amortLabel.textContent = 'Daily Amortization';
-                } else if (termType === 'weekly') {
-                    termLabel.textContent = 'Weeks';
-                    amortLabel.textContent = 'Weekly Amortization';
-                } else if (termType === 'biweekly') {
-                    termLabel.textContent = 'Bi-weeks';
-                    amortLabel.textContent = 'Bi-weekly Amortization';
-                } else {
-                    termLabel.textContent = 'Months';
-                    amortLabel.textContent = 'Monthly Amortization';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function showAuthAlert(message) {
+            const alertBox = document.getElementById('auth-inline-alert');
+            alertBox.textContent = message;
+            alertBox.classList.remove('hidden');
+        }
+
+        function clearAuthAlert() {
+            const alertBox = document.getElementById('auth-inline-alert');
+            alertBox.textContent = '';
+            alertBox.classList.add('hidden');
+        }
+
+        function getStatusBadge(status) {
+            switch (status) {
+                case 'approved':
+                    return '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">Approved</span>';
+                case 'pending':
+                    return '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">Pending</span>';
+                case 'paid':
+                    return '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-sky-100 text-sky-800">Paid</span>';
+                case 'rejected':
+                    return '<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800">Rejected</span>';
+                default:
+                    return `<span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-800">${status}</span>`;
+            }
+        }
+
+        /**
+         * ===================================================================
+         * 3. AUTHENTICATION & AUTOMATIC ROLE DETECTION
+         * ===================================================================
+         */
+        function switchAuthMode(mode) {
+            clearAuthAlert();
+            const loginForm = document.getElementById('login-form');
+            const regForm = document.getElementById('register-form');
+            const heading = document.getElementById('auth-heading');
+            const subheading = document.getElementById('auth-subheading');
+
+            if (mode === 'login') {
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+                heading.textContent = 'Welcome Back';
+                subheading.textContent = 'Sign in using your registered email address and password.';
+            } else {
+                loginForm.classList.add('hidden');
+                regForm.classList.remove('hidden');
+                heading.textContent = 'Create an Account';
+                subheading.textContent = 'Register with your email address to access your borrower portal.';
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            clearAuthAlert();
+
+            if (!isSupabaseConfigured || !supabaseClient) {
+                return showAuthAlert('Supabase connection is not configured yet. Please add your SUPABASE_URL and SUPABASE_ANON_KEY in the application script configuration.');
+            }
+
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+            const submitBtn = document.getElementById('login-submit-btn');
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Signing In...</span>';
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) {
+                    showAuthAlert(error.message);
+                    return;
                 }
 
-                if (principal > 0 && termCount > 0) {
-                    // Convert chosen term duration into equivalent months for 5% monthly interest calculation
-                    let monthsEquivalent = 0;
-                    if (termType === 'daily') monthsEquivalent = termCount / 30;
-                    else if (termType === 'weekly') monthsEquivalent = termCount / 4;
-                    else if (termType === 'biweekly') monthsEquivalent = termCount / 2;
-                    else if (termType === 'monthly') monthsEquivalent = termCount;
+                // Automatically detect user role from profiles table
+                const { data: profile, error: profErr } = await supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', data.user.id)
+                    .single();
 
-                    // Total Interest = Principal * rate * months equivalent
-                    const totalInterest = principal * INTEREST_RATE * monthsEquivalent;
-                    // Total Payment = Principal + Total Interest
-                    const totalPayment = principal + totalInterest;
-                    // Amortization per term
-                    const amortization = totalPayment / termCount;
-
-                    // Update UI
-                    resAmort.textContent = formatCurrency(amortization);
-                } else {
-                    // Reset UI if inputs are empty or invalid
-                    resAmort.textContent = '₱0.00';
+                if (profErr || !profile) {
+                    showAuthAlert('Account profile not found. Please contact the administrator.');
+                    await supabaseClient.auth.signOut();
+                    return;
                 }
+
+                currentUser = profile;
+                showToast(`Signed in as ${profile.full_name}`, 'success');
+                await renderActiveDashboard();
+            } catch (err) {
+                showAuthAlert('An unexpected error occurred during sign in. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Sign In</span><i class="fa-solid fa-arrow-right"></i>';
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            clearAuthAlert();
+
+            if (!isSupabaseConfigured || !supabaseClient) {
+                return showAuthAlert('Supabase connection is not configured yet. Please add your SUPABASE_URL and SUPABASE_ANON_KEY in the application script configuration.');
+            }
+
+            const fullName = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim().toLowerCase();
+            const password = document.getElementById('reg-password').value;
+            const submitBtn = document.getElementById('register-submit-btn');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating Account...';
+
+            try {
+                const { data, error } = await supabaseClient.auth.signUp({ email, password });
+                if (error) {
+                    showAuthAlert(error.message);
+                    return;
+                }
+
+                if (!data.user) {
+                    showAuthAlert('Registration submitted. Please check your email to verify your account before signing in.');
+                    return;
+                }
+
+                const newProfile = {
+                    id: data.user.id,
+                    full_name: fullName,
+                    email: email,
+                    role: 'user',
+                    credit_score: 650,
+                    loan_limit: 5000,
+                    savings_balance: 0,
+                    invested_capital: 0,
+                    accrued_earnings: 0
+                };
+
+                const { error: insertErr } = await supabaseClient.from('profiles').insert([newProfile]);
+                if (insertErr) {
+                    showAuthAlert(insertErr.message);
+                    return;
+                }
+
+                currentUser = newProfile;
+                showToast('Account created successfully!', 'success');
+                await renderActiveDashboard();
+            } catch (err) {
+                showAuthAlert('Unable to complete registration. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Account';
+            }
+        }
+
+        async function logout() {
+            if (supabaseClient) {
+                await supabaseClient.auth.signOut();
+            }
+            currentUser = null;
+            document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('user-dashboard').classList.add('hidden');
+            document.getElementById('investor-dashboard').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.add('hidden');
+            document.getElementById('nav-user-controls').classList.add('hidden');
+            document.getElementById('nav-user-controls').classList.remove('flex');
+            document.getElementById('login-form').reset();
+            clearAuthAlert();
+            showToast('You have been signed out.', 'info');
+        }
+
+        /**
+         * ===================================================================
+         * 4. DATA FETCHING & ROLE-BASED DASHBOARD ROUTER
+         * ===================================================================
+         */
+        async function fetchAllData() {
+            if (!supabaseClient) return { profiles: [], loans: [], investments: [] };
+
+            const [profilesRes, loansRes, invRes] = await Promise.all([
+                supabaseClient.from('profiles').select('*').order('created_at', { ascending: true }),
+                supabaseClient.from('loans').select('*').order('created_at', { ascending: false }),
+                supabaseClient.from('investments').select('*').order('created_at', { ascending: false })
+            ]);
+
+            return {
+                profiles: profilesRes.data || [],
+                loans: loansRes.data || [],
+                investments: invRes.data || []
+            };
+        }
+
+        async function renderActiveDashboard() {
+            if (!currentUser) return;
+
+            const db = await fetchAllData();
+            const freshUser = db.profiles.find(p => p.id === currentUser.id);
+            if (freshUser) currentUser = freshUser;
+
+            // Update Top Navbar
+            document.getElementById('auth-screen').classList.add('hidden');
+            const navControls = document.getElementById('nav-user-controls');
+            navControls.classList.remove('hidden');
+            navControls.classList.add('flex');
+            document.getElementById('nav-user-name').textContent = currentUser.full_name;
+            document.getElementById('nav-user-role').textContent = currentUser.role === 'user' ? 'Borrower' : currentUser.role;
+
+            // Hide all role dashboards before routing
+            document.getElementById('user-dashboard').classList.add('hidden');
+            document.getElementById('investor-dashboard').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.add('hidden');
+
+            // Route automatically based on profile role
+            if (currentUser.role === 'user') {
+                renderUserDashboard(db);
+            } else if (currentUser.role === 'investor') {
+                renderInvestorDashboard(db);
+            } else if (currentUser.role === 'admin') {
+                renderAdminDashboard(db);
+            }
+        }
+
+        /**
+         * ===================================================================
+         * 5. BORROWER (USER) DASHBOARD LOGIC
+         * ===================================================================
+         */
+        function renderUserDashboard(db) {
+            document.getElementById('user-dashboard').classList.remove('hidden');
+            document.getElementById('user-welcome-name').textContent = currentUser.full_name;
+            document.getElementById('user-credit-score').textContent = currentUser.credit_score;
+
+            const badge = document.getElementById('user-credit-badge');
+            if (currentUser.credit_score >= 750) {
+                badge.className = 'px-3 py-1 rounded-xl text-xs font-bold bg-emerald-100 text-emerald-800';
+                badge.textContent = 'Excellent';
+            } else if (currentUser.credit_score >= 650) {
+                badge.className = 'px-3 py-1 rounded-xl text-xs font-bold bg-sky-100 text-sky-800';
+                badge.textContent = 'Good Standing';
+            } else {
+                badge.className = 'px-3 py-1 rounded-xl text-xs font-bold bg-amber-100 text-amber-800';
+                badge.textContent = 'Fair Standing';
+            }
+
+            const myLoans = db.loans.filter(l => l.user_id === currentUser.id);
+            const activeApprovedLoans = myLoans.filter(l => l.status === 'approved');
+            const pendingLoans = myLoans.filter(l => l.status === 'pending');
+
+            const activePrincipalUsed = [...activeApprovedLoans, ...pendingLoans].reduce((sum, l) => sum + Number(l.amount), 0);
+            const activeBalanceDue = activeApprovedLoans.reduce((sum, l) => sum + Number(l.total_due), 0);
+            const availableLimit = Math.max(0, Number(currentUser.loan_limit) - activePrincipalUsed);
+
+            document.getElementById('user-max-limit').textContent = formatPHP(currentUser.loan_limit);
+            document.getElementById('user-available-limit').textContent = formatPHP(availableLimit);
+            document.getElementById('user-form-limit-hint').textContent = formatPHP(availableLimit);
+            document.getElementById('user-loan-amount').max = availableLimit;
+            document.getElementById('user-active-balance').textContent = formatPHP(activeBalanceDue);
+            document.getElementById('user-savings').textContent = formatPHP(currentUser.savings_balance);
+
+            if (activeApprovedLoans.length > 0) {
+                const sorted = [...activeApprovedLoans].sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+                document.getElementById('user-due-date').textContent = sorted[0].due_date || 'Scheduled';
+                document.getElementById('user-due-status').textContent = 'Upcoming payment due date';
+            } else {
+                document.getElementById('user-due-date').textContent = 'No Active Due';
+                document.getElementById('user-due-status').textContent = 'Zero active loan balance';
+            }
+
+            const tbody = document.getElementById('user-loans-tbody');
+            if (myLoans.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 text-xs">No loan applications found. Use the form on the left to submit a request.</td></tr>`;
+            } else {
+                tbody.innerHTML = myLoans.map(loan => `
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="py-3 px-2">
+                            <div class="font-bold text-slate-800">${loan.purpose}</div>
+                            <div class="text-[11px] text-slate-400">${(loan.created_at || '').split('T')[0]} • ${loan.term_months} mo(s)</div>
+                        </td>
+                        <td class="py-3 px-2 font-semibold">${formatPHP(loan.amount)}</td>
+                        <td class="py-3 px-2 font-bold text-slate-900">${formatPHP(loan.total_due)}</td>
+                        <td class="py-3 px-2 text-xs font-semibold text-amber-700">${loan.due_date || 'TBD'}</td>
+                        <td class="py-3 px-2 text-right">${getStatusBadge(loan.status)}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        /**
+         * ===================================================================
+         * 6. INVESTOR DASHBOARD LOGIC
+         * ===================================================================
+         */
+        function switchInvestorTab(tab) {
+            const pPort = document.getElementById('inv-panel-portfolio');
+            const pLoan = document.getElementById('inv-panel-loan');
+            const tPort = document.getElementById('inv-tab-portfolio');
+            const tLoan = document.getElementById('inv-tab-loan');
+
+            if (tab === 'portfolio') {
+                pPort.classList.remove('hidden');
+                pLoan.classList.add('hidden');
+                tPort.className = 'flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold bg-emerald-600 text-white shadow-sm transition';
+                tLoan.className = 'flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition';
+            } else {
+                pPort.classList.add('hidden');
+                pLoan.classList.remove('hidden');
+                tLoan.className = 'flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-900 text-white shadow-sm transition';
+                tPort.className = 'flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition';
+            }
+        }
+
+        function renderInvestorDashboard(db) {
+            document.getElementById('investor-dashboard').classList.remove('hidden');
+            document.getElementById('inv-welcome-name').textContent = currentUser.full_name;
+            document.getElementById('inv-credit-score').textContent = currentUser.credit_score;
+
+            const capital = Number(currentUser.invested_capital || 0);
+            const earnings = Number(currentUser.accrued_earnings || 0);
+            const totalValue = capital + earnings;
+
+            document.getElementById('inv-capital').textContent = formatPHP(capital);
+            document.getElementById('inv-earnings').textContent = formatPHP(earnings);
+            document.getElementById('inv-total-value').textContent = formatPHP(totalValue);
+
+            const myLoans = db.loans.filter(l => l.user_id === currentUser.id);
+            const activeApproved = myLoans.filter(l => l.status === 'approved');
+            const pendingLoans = myLoans.filter(l => l.status === 'pending');
+
+            const usedPrincipal = [...activeApproved, ...pendingLoans].reduce((sum, l) => sum + Number(l.amount), 0);
+            const activeDue = activeApproved.reduce((sum, l) => sum + Number(l.total_due), 0);
+            const availableLimit = Math.max(0, Number(currentUser.loan_limit) - usedPrincipal);
+
+            document.getElementById('inv-available-limit').textContent = formatPHP(availableLimit);
+            document.getElementById('inv-form-limit-hint').textContent = formatPHP(availableLimit);
+            document.getElementById('inv-loan-amount').max = availableLimit;
+            document.getElementById('inv-active-balance').textContent = formatPHP(activeDue);
+
+            const myDeposits = db.investments.filter(i => i.investor_id === currentUser.id);
+            const depTbody = document.getElementById('inv-deposits-tbody');
+            if (myDeposits.length === 0) {
+                depTbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-400 text-xs">No investment deposit records found.</td></tr>`;
+            } else {
+                depTbody.innerHTML = myDeposits.map(dep => `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3 px-2 text-xs text-slate-500">${(dep.created_at || '').split('T')[0]}</td>
+                        <td class="py-3 px-2 font-semibold text-slate-800">${dep.reference_no}</td>
+                        <td class="py-3 px-2 font-bold text-emerald-700">${formatPHP(dep.amount)}</td>
+                        <td class="py-3 px-2 text-right">${getStatusBadge(dep.status)}</td>
+                    </tr>
+                `).join('');
+            }
+
+            const loanTbody = document.getElementById('inv-loans-tbody');
+            if (myLoans.length === 0) {
+                loanTbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 text-xs">No personal loan applications found.</td></tr>`;
+            } else {
+                loanTbody.innerHTML = myLoans.map(loan => `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3 px-2">
+                            <div class="font-bold text-slate-800">${loan.purpose}</div>
+                            <div class="text-[11px] text-slate-400">${(loan.created_at || '').split('T')[0]} • ${loan.term_months} mo(s)</div>
+                        </td>
+                        <td class="py-3 px-2 font-semibold">${formatPHP(loan.amount)}</td>
+                        <td class="py-3 px-2 font-bold text-slate-900">${formatPHP(loan.total_due)}</td>
+                        <td class="py-3 px-2 text-xs font-semibold text-amber-700">${loan.due_date || 'TBD'}</td>
+                        <td class="py-3 px-2 text-right">${getStatusBadge(loan.status)}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        async function submitInvestmentDeposit(e) {
+            e.preventDefault();
+            const amount = Number(document.getElementById('inv-deposit-amount').value);
+            const ref = document.getElementById('inv-deposit-ref').value.trim();
+
+            if (amount <= 0) return showToast('Please enter a valid deposit amount.', 'error');
+
+            const payload = {
+                investor_id: currentUser.id,
+                investor_name: currentUser.full_name,
+                amount: amount,
+                reference_no: ref,
+                status: 'pending'
             };
 
-            // Add Event Listeners for real-time calculation
-            loanAmountInput.addEventListener('input', calculateLoan);
-            loanTermInput.addEventListener('input', calculateLoan);
-            termTypeSelect.addEventListener('change', calculateLoan);
+            const { error } = await supabaseClient.from('investments').insert([payload]);
+            if (error) return showToast(error.message, 'error');
+
+            e.target.reset();
+            showToast('Deposit request submitted for administrator verification.', 'success');
+            await renderActiveDashboard();
+        }
+
+        /**
+         * ===================================================================
+         * 7. SHARED LOAN CALCULATOR & APPLICATION SUBMISSION
+         * ===================================================================
+         */
+        function calculateLoanPreview(prefix) {
+            const p = prefix === 'user' ? 'user' : 'inv';
+            const amount = Number(document.getElementById(`${p}-loan-amount`).value || 0);
+            const months = Number(document.getElementById(`${p}-loan-term`).value || 1);
+            const interest = amount * 0.05 * months;
+            const total = amount + interest;
+
+            document.getElementById(`${p}-calc-principal`).textContent = formatPHP(amount);
+            document.getElementById(`${p}-calc-interest`).textContent = formatPHP(interest);
+            document.getElementById(`${p}-calc-total`).textContent = formatPHP(total);
+        }
+
+        async function submitLoanApplication(e, roleType) {
+            e.preventDefault();
+            const p = roleType === 'user' ? 'user' : 'inv';
+            const amount = Number(document.getElementById(`${p}-loan-amount`).value);
+            const months = Number(document.getElementById(`${p}-loan-term`).value);
+            const purpose = document.getElementById(`${p}-loan-purpose`).value.trim();
+
+            const db = await fetchAllData();
+            const myLoans = db.loans.filter(l => l.user_id === currentUser.id && (l.status === 'approved' || l.status === 'pending'));
+            const usedPrincipal = myLoans.reduce((sum, l) => sum + Number(l.amount), 0);
+            const availableLimit = Math.max(0, Number(currentUser.loan_limit) - usedPrincipal);
+
+            if (amount > availableLimit) {
+                return showToast(`Amount exceeds your available credit limit (${formatPHP(availableLimit)}).`, 'error');
+            }
+
+            const interest = amount * 0.05 * months;
+            const totalDue = amount + interest;
+
+            const due = new Date();
+            due.setMonth(due.getMonth() + months);
+            const dueDateStr = due.toISOString().split('T')[0];
+
+            const payload = {
+                user_id: currentUser.id,
+                applicant_name: currentUser.full_name,
+                applicant_role: currentUser.role,
+                amount: amount,
+                term_months: months,
+                interest_amount: interest,
+                total_due: totalDue,
+                purpose: purpose,
+                due_date: dueDateStr,
+                status: 'pending'
+            };
+
+            const { error } = await supabaseClient.from('loans').insert([payload]);
+            if (error) return showToast(error.message, 'error');
+
+            e.target.reset();
+            calculateLoanPreview(roleType);
+            showToast('Loan application submitted for review.', 'success');
+            await renderActiveDashboard();
+        }
+
+        /**
+         * ===================================================================
+         * 8. ADMIN CONTROL CENTER LOGIC
+         * ===================================================================
+         */
+        function switchAdminTab(tab) {
+            const panels = ['members', 'loans', 'deposits'];
+            panels.forEach(p => {
+                const panelEl = document.getElementById(`admin-panel-${p}`);
+                const tabEl = document.getElementById(`admin-tab-${p}`);
+                if (p === tab) {
+                    panelEl.classList.remove('hidden');
+                    tabEl.className = 'flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-900 text-white shadow-sm transition';
+                } else {
+                    panelEl.classList.add('hidden');
+                    tabEl.className = 'flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition';
+                }
+            });
+        }
+
+        function renderAdminDashboard(db) {
+            document.getElementById('admin-dashboard').classList.remove('hidden');
+
+            const totalPool = db.profiles.reduce((sum, p) => sum + Number(p.invested_capital || 0), 0);
+            const activeDisbursed = db.loans
+                .filter(l => l.status === 'approved')
+                .reduce((sum, l) => sum + Number(l.amount || 0), 0);
+            const pendingLoansCount = db.loans.filter(l => l.status === 'pending').length;
+            const pendingDepositsCount = db.investments.filter(i => i.status === 'pending').length;
+
+            document.getElementById('admin-kpi-members').textContent = db.profiles.length;
+            document.getElementById('admin-kpi-disbursed').textContent = formatPHP(activeDisbursed);
+            document.getElementById('admin-kpi-pool').textContent = formatPHP(totalPool);
+            document.getElementById('admin-kpi-pending-total').textContent = pendingLoansCount + pendingDepositsCount;
+            document.getElementById('admin-badge-loans').textContent = pendingLoansCount;
+            document.getElementById('admin-badge-deposits').textContent = pendingDepositsCount;
+
+            // 1. Member Accounts Table
+            const membersTbody = document.getElementById('admin-members-tbody');
+            if (db.profiles.length === 0) {
+                membersTbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 text-xs">No registered members found.</td></tr>`;
+            } else {
+                membersTbody.innerHTML = db.profiles.map(member => {
+                    const roleBadge = member.role === 'investor'
+                        ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800">Investor</span>'
+                        : member.role === 'admin'
+                        ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-amber-100 text-amber-800">Admin</span>'
+                        : '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-sky-100 text-sky-800">Borrower</span>';
+
+                    return `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="py-3.5 px-3">
+                                <div class="font-bold text-slate-900">${member.full_name}</div>
+                                <div class="flex items-center gap-1.5 mt-0.5">
+                                    ${roleBadge}
+                                    <span class="text-xs text-slate-400">${member.email}</span>
+                                </div>
+                            </td>
+                            <td class="py-3.5 px-3 font-extrabold text-slate-800">${member.credit_score}</td>
+                            <td class="py-3.5 px-3 font-bold text-slate-900">${formatPHP(member.loan_limit)}</td>
+                            <td class="py-3.5 px-3 font-semibold text-sky-700">${formatPHP(member.savings_balance)}</td>
+                            <td class="py-3.5 px-3 font-bold text-emerald-700">${formatPHP(member.invested_capital)}</td>
+                            <td class="py-3.5 px-3 font-bold text-indigo-600">${formatPHP(member.accrued_earnings)}</td>
+                            <td class="py-3.5 px-3 text-right">
+                                <button onclick="openEditModal('${member.id}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white text-xs font-bold transition shadow-sm">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit Account
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // 2. Loan Applications Table
+            const loansTbody = document.getElementById('admin-loans-tbody');
+            if (db.loans.length === 0) {
+                loansTbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 text-xs">No loan records found.</td></tr>`;
+            } else {
+                loansTbody.innerHTML = db.loans.map(loan => `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3.5 px-3">
+                            <div class="font-bold text-slate-900">${loan.applicant_name}</div>
+                            <div class="text-[11px] uppercase font-bold text-slate-400">${loan.applicant_role === 'user' ? 'Borrower' : loan.applicant_role}</div>
+                        </td>
+                        <td class="py-3.5 px-3">
+                            <div class="font-medium text-slate-800">${loan.purpose}</div>
+                            <div class="text-xs text-slate-400">${loan.term_months} month(s) • Applied ${(loan.created_at || '').split('T')[0]}</div>
+                        </td>
+                        <td class="py-3.5 px-3 font-semibold">${formatPHP(loan.amount)}</td>
+                        <td class="py-3.5 px-3 font-bold text-slate-900">${formatPHP(loan.total_due)}</td>
+                        <td class="py-3.5 px-3 text-xs font-semibold text-amber-700">${loan.due_date || 'N/A'}</td>
+                        <td class="py-3.5 px-3">${getStatusBadge(loan.status)}</td>
+                        <td class="py-3.5 px-3 text-right space-x-1">
+                            ${loan.status === 'pending' ? `
+                                <button onclick="updateLoanStatus('${loan.id}', 'approved')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">Approve</button>
+                                <button onclick="updateLoanStatus('${loan.id}', 'rejected')" class="px-2.5 py-1.5 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold">Reject</button>
+                            ` : loan.status === 'approved' ? `
+                                <button onclick="updateLoanStatus('${loan.id}', 'paid')" class="px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold">Mark Paid</button>
+                            ` : `<span class="text-xs text-slate-400">Completed</span>`}
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // 3. Investor Deposits Table
+            const depositsTbody = document.getElementById('admin-deposits-tbody');
+            if (db.investments.length === 0) {
+                depositsTbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 text-xs">No investment deposit requests found.</td></tr>`;
+            } else {
+                depositsTbody.innerHTML = db.investments.map(dep => `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3.5 px-3 font-bold text-slate-900">${dep.investor_name}</td>
+                        <td class="py-3.5 px-3 text-xs text-slate-500">${(dep.created_at || '').split('T')[0]}</td>
+                        <td class="py-3.5 px-3 font-mono text-xs text-slate-700">${dep.reference_no}</td>
+                        <td class="py-3.5 px-3 font-bold text-emerald-700">${formatPHP(dep.amount)}</td>
+                        <td class="py-3.5 px-3">${getStatusBadge(dep.status)}</td>
+                        <td class="py-3.5 px-3 text-right space-x-1">
+                            ${dep.status === 'pending' ? `
+                                <button onclick="approveInvestorDeposit('${dep.id}', 'approved')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">Approve & Credit</button>
+                                <button onclick="approveInvestorDeposit('${dep.id}', 'rejected')" class="px-2.5 py-1.5 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold">Reject</button>
+                            ` : `<span class="text-xs text-slate-400">Processed</span>`}
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        async function openEditModal(memberId) {
+            const db = await fetchAllData();
+            const member = db.profiles.find(p => p.id === memberId);
+            if (!member) return;
+
+            document.getElementById('edit-member-id').value = member.id;
+            document.getElementById('edit-modal-subtitle').textContent = `${member.full_name} (${member.email})`;
+            document.getElementById('edit-credit-score').value = member.credit_score;
+            document.getElementById('edit-loan-limit').value = member.loan_limit;
+            document.getElementById('edit-savings').value = member.savings_balance;
+            document.getElementById('edit-role').value = member.role;
+            document.getElementById('edit-invested-capital').value = member.invested_capital;
+            document.getElementById('edit-accrued-earnings').value = member.accrued_earnings;
+
+            const modal = document.getElementById('edit-member-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('edit-member-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        async function saveMemberUpdates(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-member-id').value;
+            const updates = {
+                credit_score: Number(document.getElementById('edit-credit-score').value),
+                loan_limit: Number(document.getElementById('edit-loan-limit').value),
+                savings_balance: Number(document.getElementById('edit-savings').value),
+                role: document.getElementById('edit-role').value,
+                invested_capital: Number(document.getElementById('edit-invested-capital').value),
+                accrued_earnings: Number(document.getElementById('edit-accrued-earnings').value)
+            };
+
+            const { error } = await supabaseClient.from('profiles').update(updates).eq('id', id);
+            if (error) return showToast(error.message, 'error');
+
+            closeEditModal();
+            showToast('Member account updated successfully.', 'success');
+            await renderActiveDashboard();
+        }
+
+        async function updateLoanStatus(loanId, newStatus) {
+            const { error } = await supabaseClient.from('loans').update({ status: newStatus }).eq('id', loanId);
+            if (error) return showToast(error.message, 'error');
+
+            showToast(`Loan marked as ${newStatus}.`, 'success');
+            await renderActiveDashboard();
+        }
+
+        async function approveInvestorDeposit(depositId, newStatus) {
+            const { data: dep, error: fetchErr } = await supabaseClient
+                .from('investments')
+                .select('*')
+                .eq('id', depositId)
+                .single();
+
+            if (fetchErr || !dep) return showToast('Deposit record not found.', 'error');
+
+            const { error: updateErr } = await supabaseClient
+                .from('investments')
+                .update({ status: newStatus })
+                .eq('id', depositId);
+
+            if (updateErr) return showToast(updateErr.message, 'error');
+
+            if (newStatus === 'approved') {
+                const { data: invProfile } = await supabaseClient
+                    .from('profiles')
+                    .select('invested_capital')
+                    .eq('id', dep.investor_id)
+                    .single();
+
+                const updatedCap = Number(invProfile?.invested_capital || 0) + Number(dep.amount);
+                await supabaseClient
+                    .from('profiles')
+                    .update({ invested_capital: updatedCap })
+                    .eq('id', dep.investor_id);
+            }
+
+            showToast(
+                newStatus === 'approved'
+                    ? 'Deposit approved and credited to investor capital.'
+                    : 'Deposit request rejected.',
+                'success'
+            );
+            await renderActiveDashboard();
+        }
+
+        /**
+         * ===================================================================
+         * 9. AUTO-RESTORE SESSION ON PAGE LOAD
+         * ===================================================================
+         */
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (!isSupabaseConfigured || !supabaseClient) return;
+
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session && session.user) {
+                const { data: profile } = await supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (profile) {
+                    currentUser = profile;
+                    await renderActiveDashboard();
+                }
+            }
         });
     </script>
 </body>
