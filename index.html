@@ -92,7 +92,7 @@
         <!-- =================================================================
              1. CLEAN PRODUCTION AUTHENTICATION SCREEN
         ================================================================== -->
-        <section id="auth-screen" class="max-w-md w-full mx-auto">
+        <section id="auth-screen" class="max-w-md w-full mx-auto transition-all duration-300">
             <div class="bg-white rounded-3xl p-7 sm:p-9 border border-slate-200 shadow-lg shadow-slate-200/50">
                 <!-- Header -->
                 <div class="text-center mb-7">
@@ -112,7 +112,7 @@
                         <label for="login-email" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Email Address</label>
                         <div class="relative">
                             <i class="fa-solid fa-envelope absolute left-3.5 top-3.5 text-slate-400"></i>
-                            <input type="email" id="login-email" required placeholder="name@example.com" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm transition">
+                            <input type="email" id="login-email" required placeholder="name@gmail.com" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm transition">
                         </div>
                     </div>
 
@@ -138,24 +138,63 @@
                     </div>
                 </form>
 
-                <!-- Register Form -->
+                <!-- Register Form (Full Information) -->
                 <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                    <!-- 1. Full Name -->
                     <div>
                         <label for="reg-name" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Full Name</label>
                         <div class="relative">
                             <i class="fa-solid fa-user absolute left-3.5 top-3.5 text-slate-400"></i>
-                            <input type="text" id="reg-name" required placeholder="John Doe" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm transition">
+                            <input type="text" id="reg-name" required placeholder="Juan Dela Cruz" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm transition">
                         </div>
                     </div>
 
+                    <!-- 2. Complete Address -->
                     <div>
-                        <label for="reg-email" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Email Address</label>
+                        <label for="reg-address" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Complete Address</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-location-dot absolute left-3.5 top-3.5 text-slate-400"></i>
+                            <input type="text" id="reg-address" required placeholder="Barangay, Municipality / City, Province" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm transition">
+                        </div>
+                    </div>
+
+                    <!-- 3. Work & 4. Monthly Salary Range -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="reg-work" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Work / Occupation</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-briefcase absolute left-3.5 top-3.5 text-slate-400"></i>
+                                <input type="text" id="reg-work" required placeholder="e.g., Teacher, Rider, Business" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm transition">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="reg-salary" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Monthly Income Range</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-peso-sign absolute left-3.5 top-3.5 text-slate-400"></i>
+                                <select id="reg-salary" required class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm bg-white transition">
+                                    <option value="" disabled selected>Select salary range</option>
+                                    <option value="Below ₱10,000">Below ₱10,000</option>
+                                    <option value="₱10,000 – ₱20,000">₱10,000 – ₱20,000</option>
+                                    <option value="₱20,001 – ₱35,000">₱20,001 – ₱35,000</option>
+                                    <option value="₱35,001 – ₱50,000">₱35,001 – ₱50,000</option>
+                                    <option value="₱50,001 – ₱80,000">₱50,001 – ₱80,000</option>
+                                    <option value="Above ₱80,000">Above ₱80,000</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Gmail / Email Address -->
+                    <div>
+                        <label for="reg-email" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Gmail / Email Address</label>
                         <div class="relative">
                             <i class="fa-solid fa-envelope absolute left-3.5 top-3.5 text-slate-400"></i>
-                            <input type="email" id="reg-email" required placeholder="name@example.com" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm transition">
+                            <input type="email" id="reg-email" required placeholder="juandelacruz@gmail.com" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm transition">
                         </div>
                     </div>
 
+                    <!-- 6. Password -->
                     <div>
                         <label for="reg-password" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Password</label>
                         <div class="relative">
@@ -604,14 +643,14 @@
             <div id="admin-panel-members" class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
                 <div class="mb-4">
                     <h3 class="font-bold text-lg text-slate-900">Member Accounts Directory</h3>
-                    <p class="text-xs text-slate-500">Click <strong>Edit Account</strong> to update role, credit score, loan limit, savings, invested capital, or accrued profit.</p>
+                    <p class="text-xs text-slate-500">Click <strong>Edit Account</strong> to update role, profile details, credit score, loan limit, savings, or investor earnings.</p>
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                                <th class="py-3 px-3">Member & Role</th>
+                                <th class="py-3 px-3">Member & Profile</th>
                                 <th class="py-3 px-3">Credit Score</th>
                                 <th class="py-3 px-3">Max Loan Limit</th>
                                 <th class="py-3 px-3">Savings</th>
@@ -682,8 +721,8 @@
     <!-- =====================================================================
          ADMIN EDIT MEMBER MODAL
     ====================================================================== -->
-    <div id="edit-member-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200">
+    <div id="edit-member-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 my-auto">
             <div class="flex items-center justify-between mb-4">
                 <div>
                     <h3 class="text-xl font-extrabold text-slate-900">Edit Member Account</h3>
@@ -697,6 +736,32 @@
             <form onsubmit="saveMemberUpdates(event)" class="space-y-4">
                 <input type="hidden" id="edit-member-id">
 
+                <!-- Personal & Employment Details -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Complete Address</label>
+                    <input type="text" id="edit-address" placeholder="Barangay, Municipality / City, Province" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Work / Occupation</label>
+                        <input type="text" id="edit-work" placeholder="Occupation" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Monthly Income Range</label>
+                        <select id="edit-salary" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm bg-white">
+                            <option value="">Not specified</option>
+                            <option value="Below ₱10,000">Below ₱10,000</option>
+                            <option value="₱10,000 – ₱20,000">₱10,000 – ₱20,000</option>
+                            <option value="₱20,001 – ₱35,000">₱20,001 – ₱35,000</option>
+                            <option value="₱35,001 – ₱50,000">₱35,001 – ₱50,000</option>
+                            <option value="₱50,001 – ₱80,000">₱50,001 – ₱80,000</option>
+                            <option value="Above ₱80,000">Above ₱80,000</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Credit & Account Settings -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Credit Score (300–850)</label>
@@ -767,15 +832,15 @@
         /**
          * ===================================================================
          * 1. SUPABASE CONFIGURATION
-         * Replace SUPABASE_URL and SUPABASE_ANON_KEY with your project's API
-         * credentials from Supabase Dashboard -> Project Settings -> API.
-         *
          * -------------------------------------------------------------------
          * REQUIRED SUPABASE SQL SCHEMA (Run in Supabase SQL Editor):
          * -------------------------------------------------------------------
          * create table public.profiles (
          *   id uuid references auth.users on delete cascade primary key,
          *   full_name text not null,
+         *   address text,
+         *   work text,
+         *   monthly_income text,
          *   email text not null,
          *   role text not null default 'user' check (role in ('user', 'investor', 'admin')),
          *   credit_score integer not null default 650,
@@ -785,45 +850,6 @@
          *   accrued_earnings numeric not null default 0,
          *   created_at timestamp with time zone default timezone('utc'::text, now()) not null
          * );
-         *
-         * create table public.loans (
-         *   id uuid default gen_random_uuid() primary key,
-         *   user_id uuid references public.profiles(id) on delete cascade not null,
-         *   applicant_name text not null,
-         *   applicant_role text not null,
-         *   amount numeric not null,
-         *   term_months integer not null,
-         *   interest_amount numeric not null,
-         *   total_due numeric not null,
-         *   purpose text,
-         *   due_date date,
-         *   status text not null default 'pending' check (status in ('pending', 'approved', 'paid', 'rejected')),
-         *   created_at timestamp with time zone default timezone('utc'::text, now()) not null
-         * );
-         *
-         * create table public.investments (
-         *   id uuid default gen_random_uuid() primary key,
-         *   investor_id uuid references public.profiles(id) on delete cascade not null,
-         *   investor_name text not null,
-         *   amount numeric not null,
-         *   reference_no text not null,
-         *   status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
-         *   created_at timestamp with time zone default timezone('utc'::text, now()) not null
-         * );
-         *
-         * alter table public.profiles enable row level security;
-         * alter table public.loans enable row level security;
-         * alter table public.investments enable row level security;
-         *
-         * create policy "Authenticated read profiles" on public.profiles for select using (auth.role() = 'authenticated');
-         * create policy "Users insert own profile" on public.profiles for insert with check (auth.uid() = id);
-         * create policy "Authenticated update profiles" on public.profiles for update using (auth.role() = 'authenticated');
-         * create policy "Authenticated read loans" on public.loans for select using (auth.role() = 'authenticated');
-         * create policy "Authenticated insert loans" on public.loans for insert with check (auth.role() = 'authenticated');
-         * create policy "Authenticated update loans" on public.loans for update using (auth.role() = 'authenticated');
-         * create policy "Authenticated read investments" on public.investments for select using (auth.role() = 'authenticated');
-         * create policy "Authenticated insert investments" on public.investments for insert with check (auth.role() = 'authenticated');
-         * create policy "Authenticated update investments" on public.investments for update using (auth.role() = 'authenticated');
          * ===================================================================
          */
         const SUPABASE_URL = 'https://zzqjdrgtdkqgcxlzmysz.supabase.co';
@@ -910,21 +936,26 @@
          */
         function switchAuthMode(mode) {
             clearAuthAlert();
+            const authScreen = document.getElementById('auth-screen');
             const loginForm = document.getElementById('login-form');
             const regForm = document.getElementById('register-form');
             const heading = document.getElementById('auth-heading');
             const subheading = document.getElementById('auth-subheading');
 
             if (mode === 'login') {
+                authScreen.classList.remove('max-w-lg');
+                authScreen.classList.add('max-w-md');
                 loginForm.classList.remove('hidden');
                 regForm.classList.add('hidden');
                 heading.textContent = 'Welcome Back';
                 subheading.textContent = 'Sign in using your registered email address and password.';
             } else {
+                authScreen.classList.remove('max-w-md');
+                authScreen.classList.add('max-w-lg');
                 loginForm.classList.add('hidden');
                 regForm.classList.remove('hidden');
                 heading.textContent = 'Create an Account';
-                subheading.textContent = 'Register with your email address to access your borrower portal.';
+                subheading.textContent = 'Complete your personal and income profile to register.';
             }
         }
 
@@ -983,6 +1014,9 @@
             }
 
             const fullName = document.getElementById('reg-name').value.trim();
+            const address = document.getElementById('reg-address').value.trim();
+            const work = document.getElementById('reg-work').value.trim();
+            const monthlyIncome = document.getElementById('reg-salary').value;
             const email = document.getElementById('reg-email').value.trim().toLowerCase();
             const password = document.getElementById('reg-password').value;
             const submitBtn = document.getElementById('register-submit-btn');
@@ -1005,6 +1039,9 @@
                 const newProfile = {
                     id: data.user.id,
                     full_name: fullName,
+                    address: address,
+                    work: work,
+                    monthly_income: monthlyIncome,
                     email: email,
                     role: 'user',
                     credit_score: 650,
@@ -1021,6 +1058,7 @@
                 }
 
                 currentUser = newProfile;
+                document.getElementById('register-form').reset();
                 showToast('Account created successfully!', 'success');
                 await renderActiveDashboard();
             } catch (err) {
@@ -1043,6 +1081,7 @@
             document.getElementById('nav-user-controls').classList.add('hidden');
             document.getElementById('nav-user-controls').classList.remove('flex');
             document.getElementById('login-form').reset();
+            switchAuthMode('login');
             clearAuthAlert();
             showToast('You have been signed out.', 'info');
         }
@@ -1381,6 +1420,14 @@
                         ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-amber-100 text-amber-800">Admin</span>'
                         : '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-sky-100 text-sky-800">Borrower</span>';
 
+                    const workIncomeLine = (member.work || member.monthly_income)
+                        ? `<div class="text-[11px] font-medium text-slate-600 mt-1"><i class="fa-solid fa-briefcase text-slate-400 mr-1"></i>${member.work || 'N/A'} • <span class="text-emerald-700 font-semibold">${member.monthly_income || 'N/A'}</span></div>`
+                        : '';
+
+                    const addressLine = member.address
+                        ? `<div class="text-[11px] text-slate-400 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i>${member.address}</div>`
+                        : '';
+
                     return `
                         <tr class="hover:bg-slate-50 transition">
                             <td class="py-3.5 px-3">
@@ -1389,6 +1436,8 @@
                                     ${roleBadge}
                                     <span class="text-xs text-slate-400">${member.email}</span>
                                 </div>
+                                ${workIncomeLine}
+                                ${addressLine}
                             </td>
                             <td class="py-3.5 px-3 font-extrabold text-slate-800">${member.credit_score}</td>
                             <td class="py-3.5 px-3 font-bold text-slate-900">${formatPHP(member.loan_limit)}</td>
@@ -1466,6 +1515,9 @@
 
             document.getElementById('edit-member-id').value = member.id;
             document.getElementById('edit-modal-subtitle').textContent = `${member.full_name} (${member.email})`;
+            document.getElementById('edit-address').value = member.address || '';
+            document.getElementById('edit-work').value = member.work || '';
+            document.getElementById('edit-salary').value = member.monthly_income || '';
             document.getElementById('edit-credit-score').value = member.credit_score;
             document.getElementById('edit-loan-limit').value = member.loan_limit;
             document.getElementById('edit-savings').value = member.savings_balance;
@@ -1488,6 +1540,9 @@
             e.preventDefault();
             const id = document.getElementById('edit-member-id').value;
             const updates = {
+                address: document.getElementById('edit-address').value.trim(),
+                work: document.getElementById('edit-work').value.trim(),
+                monthly_income: document.getElementById('edit-salary').value,
                 credit_score: Number(document.getElementById('edit-credit-score').value),
                 loan_limit: Number(document.getElementById('edit-loan-limit').value),
                 savings_balance: Number(document.getElementById('edit-savings').value),
